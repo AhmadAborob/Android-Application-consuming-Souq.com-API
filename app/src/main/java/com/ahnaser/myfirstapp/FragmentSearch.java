@@ -1,17 +1,24 @@
  package com.ahnaser.myfirstapp;
 
 
-import android.os.Bundle;
+ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+ import android.widget.TextView;
 
+ import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkError;
+import com.android.volley.NoConnectionError;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -44,6 +51,7 @@ public class FragmentSearch extends Fragment {
     private ArrayList<Product> listProducts=new ArrayList<>();
     private RecyclerView productsList;
     private AdapterProducts adapterProducts;
+    private TextView textVolleyError;
 
     /**
      * Use this factory method to create a new instance of
@@ -85,6 +93,7 @@ public class FragmentSearch extends Fragment {
         JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, getRequestUrl(),(String) null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
+                textVolleyError.setVisibility(View.GONE);
                 listProducts=parseJSONRequest(response);
                 adapterProducts.setListProducts(listProducts);
 
@@ -92,6 +101,23 @@ public class FragmentSearch extends Fragment {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                textVolleyError.setVisibility(View.VISIBLE);
+                if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                    textVolleyError.setText(R.string.error_timeout);
+
+                } else if (error instanceof AuthFailureError) {
+                    textVolleyError.setText(R.string.error_auth_failure);
+                    //TODO
+                } else if (error instanceof ServerError) {
+                    textVolleyError.setText(R.string.error_auth_failure);
+                    //TODO
+                } else if (error instanceof NetworkError) {
+                    textVolleyError.setText(R.string.error_network);
+                    //TODO
+                } else if (error instanceof ParseError) {
+                    textVolleyError.setText(R.string.error_parser);
+                    //TODO
+                }
 
             }
         });
@@ -109,30 +135,47 @@ public class FragmentSearch extends Fragment {
                      StringBuilder data = new StringBuilder();
                      JSONArray arrayProducts = dataObject.getJSONArray(Keys.EndpointProducts.KEY_PRODUCTS);
                      for (int i = 0; i < arrayProducts.length(); i++) {
+
+                         String id="-1";
+                         String label=Constants.NA;
+                         String msrp=Constants.NA;
+                         String offerPrice=Constants.NA;
+                         String link=Constants.NA;
+                         String image=Constants.NA;
+
                          JSONObject currentProduct = arrayProducts.getJSONObject(i);
-
-                         String id = currentProduct.getString(Keys.EndpointProducts.KEY_ID);
-
-                         String label = currentProduct.getString(Keys.EndpointProducts.KEY_LABEL);
-
-                         String msrp = currentProduct.getString(Keys.EndpointProducts.KEY_MARKET_PRICE) + " AED";
-
-                         String offerPrice = "No Offer";
-                         if (currentProduct.has(Keys.EndpointProducts.KEY_OFFER_PRICE)) {
-                             offerPrice = currentProduct.getString(Keys.EndpointProducts.KEY_OFFER_PRICE) + " AED";
+                         if(currentProduct.has(Keys.EndpointProducts.KEY_ID) && !currentProduct.isNull(Keys.EndpointProducts.KEY_ID)) {
+                             id = currentProduct.getString(Keys.EndpointProducts.KEY_ID);
                          }
 
-                         JSONObject images = currentProduct.getJSONObject(Keys.EndpointProducts.KEY_IMAGES);
-                         String image = null;
-                         if (images.has(Keys.EndpointProducts.KEY_SMALL)) {
-                             image = images.getJSONArray(Keys.EndpointProducts.KEY_SMALL).getString(0);
+                         if(currentProduct.has(Keys.EndpointProducts.KEY_LABEL) && !currentProduct.isNull(Keys.EndpointProducts.KEY_LABEL)) {
+                             label = currentProduct.getString(Keys.EndpointProducts.KEY_LABEL);
                          }
 
-                         String link = currentProduct.getString(Keys.EndpointProducts.KEY_LINK);
+                         if(currentProduct.has(Keys.EndpointProducts.KEY_MARKET_PRICE) && !currentProduct.isNull(Keys.EndpointProducts.KEY_MARKET_PRICE)) {
+                             msrp = "Price: "+ currentProduct.getString(Keys.EndpointProducts.KEY_MARKET_PRICE) + " AED";
+                         }
 
-                         Product product = new Product(id, label, msrp, offerPrice, link, image);
+                         if (currentProduct.has(Keys.EndpointProducts.KEY_OFFER_PRICE) && !currentProduct.isNull(Keys.EndpointProducts.KEY_OFFER_PRICE)) {
+                             offerPrice = "Price: "+currentProduct.getString(Keys.EndpointProducts.KEY_OFFER_PRICE) + " AED";
+                         }
 
-                         products.add(product);
+                         if(currentProduct.has(Keys.EndpointProducts.KEY_IMAGES) && !currentProduct.isNull(Keys.EndpointProducts.KEY_IMAGES)) {
+                             JSONObject images = currentProduct.getJSONObject(Keys.EndpointProducts.KEY_IMAGES);
+
+                             if (images.has(Keys.EndpointProducts.KEY_SMALL) && !images.isNull(Keys.EndpointProducts.KEY_SMALL)) {
+                                 image = images.getJSONArray(Keys.EndpointProducts.KEY_SMALL).getString(0);
+                             }
+                         }
+
+                         if(currentProduct.has(Keys.EndpointProducts.KEY_LINK) && !currentProduct.isNull(Keys.EndpointProducts.KEY_LINK)) {
+                             link = currentProduct.getString(Keys.EndpointProducts.KEY_LINK);
+                         }
+
+                         if(!id.equals("-1") && !label.equals(Constants.NA) ) {
+                             Product product = new Product(id, label, msrp, offerPrice, link, image);
+                             products.add(product);
+                         }
 
                      }
                      //L.T(getActivity(),listProducts.toString());
@@ -155,6 +198,7 @@ public class FragmentSearch extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view= inflater.inflate(R.layout.fragment_search, container, false);
+        textVolleyError=(TextView) view.findViewById(R.id.textVolleyError);
         productsList=(RecyclerView) view.findViewById(R.id.listProducts);
         productsList.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapterProducts=new AdapterProducts(getActivity());

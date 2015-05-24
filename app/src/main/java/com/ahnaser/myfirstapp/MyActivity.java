@@ -19,10 +19,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahnaser.myfirstapp.tabs.SlidingTabLayout;
+import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
+import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
+import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 
 
 public class MyActivity extends ActionBarActivity {
@@ -52,6 +56,25 @@ public class MyActivity extends ActionBarActivity {
         mTabs.setSelectedIndicatorColors(getResources().getColor(R.color.accentColor));
         mTabs.setViewPager(mPager);
 
+        ImageView imageView=new ImageView(this);
+        imageView.setImageResource(R.drawable.ic_sorter);
+        FloatingActionButton actionButton = new FloatingActionButton.Builder(this).setContentView(imageView).build();
+
+        ImageView sortPrice=new ImageView(this);
+        sortPrice.setImageResource(R.drawable.ic_sort_price);
+        ImageView sortName=new ImageView(this);
+        sortName.setImageResource(R.drawable.ic_sort_name);
+
+        SubActionButton.Builder itemBuilder = new SubActionButton.Builder(this);
+
+        SubActionButton buttonSortPrice = itemBuilder.setContentView(sortPrice).build();
+        SubActionButton buttonSortName = itemBuilder.setContentView(sortName).build();
+
+        FloatingActionMenu actionMenu = new FloatingActionMenu.Builder(this)
+                .addSubActionView(buttonSortPrice)
+                .addSubActionView(buttonSortName)
+                .attachTo(actionButton)
+                .build();
     }
 
     @Override

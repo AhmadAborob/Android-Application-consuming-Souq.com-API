@@ -49,7 +49,13 @@ public class AdapterProducts extends RecyclerView.Adapter<AdapterProducts.ViewHo
         holder.productLabel.setText(currentProduct.getLabel());
         holder.productPrice.setText(currentProduct.getOfferPrice());
         String imageLink=currentProduct.getImageLink();
-        if (imageLink!=null){
+        loadImages(imageLink,holder);
+
+    }
+
+    public void loadImages(String imageLink, final ViewHolderProducts holder){
+
+        if (!imageLink.equals(Constants.NA)){
             imageLoader.get(imageLink, new ImageLoader.ImageListener() {
                 @Override
                 public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
@@ -62,7 +68,6 @@ public class AdapterProducts extends RecyclerView.Adapter<AdapterProducts.ViewHo
                 }
             });
         }
-
     }
 
     @Override
