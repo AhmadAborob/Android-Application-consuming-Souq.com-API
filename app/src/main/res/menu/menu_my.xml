@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MyActivity">
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/using_tab_library"
+        android:orderInCategory="300"
+        android:title="@string/using_tab_library"
+        app:showAsAction="never" />
+    <item android:id="@+id/navigate"
+        android:title="@string/next"
+        android:orderInCategory="200"
+        android:icon="@drawable/ic_next"
+        app:showAsAction="always"
+        />
+</menu>
