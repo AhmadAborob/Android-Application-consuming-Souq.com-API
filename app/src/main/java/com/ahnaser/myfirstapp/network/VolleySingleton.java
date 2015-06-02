@@ -1,4 +1,4 @@
-package com.ahnaser.myfirstapp;
+package com.ahnaser.myfirstapp.network;
 
 /**
  * Created by root on 23/05/15.
@@ -6,6 +6,7 @@ package com.ahnaser.myfirstapp;
 import android.graphics.Bitmap;
 import android.util.LruCache;
 
+import com.ahnaser.myfirstapp.MyApplication;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;

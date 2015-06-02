@@ -1,16 +1,29 @@
- package com.ahnaser.myfirstapp;
+ package com.ahnaser.myfirstapp.fragments;
 
 
+ import android.content.Context;
  import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
+ import android.view.GestureDetector;
+ import android.view.LayoutInflater;
+ import android.view.MotionEvent;
+ import android.view.View;
 import android.view.ViewGroup;
- import android.widget.TextView;
+import android.widget.TextView;
 
- import com.android.volley.AuthFailureError;
+import com.ahnaser.myfirstapp.MyApplication;
+import com.ahnaser.myfirstapp.R;
+import com.ahnaser.myfirstapp.adapters.AdapterProducts;
+import com.ahnaser.myfirstapp.extras.Constants;
+import com.ahnaser.myfirstapp.extras.Keys;
+ import com.ahnaser.myfirstapp.extras.L;
+ import com.ahnaser.myfirstapp.extras.ProductSorter;
+import com.ahnaser.myfirstapp.extras.SortListener;
+import com.ahnaser.myfirstapp.network.VolleySingleton;
+import com.ahnaser.myfirstapp.pojo.Product;
+import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkError;
 import com.android.volley.NoConnectionError;
 import com.android.volley.ParseError;
@@ -34,7 +47,7 @@ import java.util.ArrayList;
  * Use the {@link FragmentSearch#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FragmentSearch extends Fragment {
+public class FragmentSearch extends Fragment implements SortListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -44,7 +57,10 @@ public class FragmentSearch extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private static String API_SOUQ_PRODUCTS_SEARCH="https://api.souq.com/v1/products?q=iphone&&page=1&show=20&show_attributes=0&country=ae&language=en&format=json";
+    private String query="iphone";
+    private static String API_SOUQ_PRODUCTS_SEARCH1="https://api.souq.com/v1/products?q=";
+     private static String API_SOUQ_PRODUCTS_SEARCH2="&&page=1&show=20&show_attributes=0&country=ae&language=en&format=json";
+     int current,totalPages;
      private VolleySingleton volleySingleton;
     private ImageLoader imageLoader;
      private RequestQueue requestQueue;
@@ -52,6 +68,7 @@ public class FragmentSearch extends Fragment {
     private RecyclerView productsList;
     private AdapterProducts adapterProducts;
     private TextView textVolleyError;
+     private ProductSorter productSorter=new ProductSorter();
 
     /**
      * Use this factory method to create a new instance of
@@ -85,16 +102,17 @@ public class FragmentSearch extends Fragment {
 
         volleySingleton=VolleySingleton.getInstance();
         requestQueue=volleySingleton.getRequestQueue();
-        sendJsonRequest();
+        //sendJsonRequest();
 
     }
 
-    private void sendJsonRequest(){
+    private void sendNewJsonRequest(){
         JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, getRequestUrl(),(String) null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 textVolleyError.setVisibility(View.GONE);
                 listProducts=parseJSONRequest(response);
+                L.T(getActivity(), Integer.toString(totalPages) + "  " + Integer.toString(current));
                 adapterProducts.setListProducts(listProducts);
 
             }
@@ -129,15 +147,36 @@ public class FragmentSearch extends Fragment {
          ArrayList<Product> products=new ArrayList<>();
 
          if (response!=null || response.length()>0) {
+
+             if(response.has(Keys.EndpointProducts.KEY_META) && !response.isNull(Keys.EndpointProducts.KEY_META)){
+                 JSONObject meta = null;
+                 try {
+                     meta = response.getJSONObject(Keys.EndpointProducts.KEY_META);
+                 } catch (JSONException e) {
+                     e.printStackTrace();
+                 }
+                 if(meta.has(Keys.EndpointProducts.KEY_PAGES) && !meta.isNull(Keys.EndpointProducts.KEY_PAGES)){
+                     try {
+                         this.totalPages=meta.getInt(Keys.EndpointProducts.KEY_PAGES);
+                     } catch (JSONException e) {
+                         e.printStackTrace();
+                     }
+                     if(this.totalPages>=1){
+                         this.current=1;
+                     }
+                 }
+
+             }
+
+
              try {
                  JSONObject dataObject = response.getJSONObject(Keys.EndpointProducts.KEY_DATA);
                  try {
-                     StringBuilder data = new StringBuilder();
                      JSONArray arrayProducts = dataObject.getJSONArray(Keys.EndpointProducts.KEY_PRODUCTS);
                      for (int i = 0; i < arrayProducts.length(); i++) {
 
                          String id="-1";
-                         String label=Constants.NA;
+                         String label= Constants.NA;
                          String msrp=Constants.NA;
                          String offerPrice=Constants.NA;
                          String link=Constants.NA;
@@ -156,9 +195,10 @@ public class FragmentSearch extends Fragment {
                              msrp = "Price: "+ currentProduct.getString(Keys.EndpointProducts.KEY_MARKET_PRICE) + " AED";
                          }
 
-                         if (currentProduct.has(Keys.EndpointProducts.KEY_OFFER_PRICE) && !currentProduct.isNull(Keys.EndpointProducts.KEY_OFFER_PRICE)) {
+                         if (currentProduct.has(Keys.EndpointProducts.KEY_OFFER_PRICE) && !currentProduct.isNull(Keys.EndpointProducts.KEY_OFFER_PRICE))
                              offerPrice = "Price: "+currentProduct.getString(Keys.EndpointProducts.KEY_OFFER_PRICE) + " AED";
-                         }
+                         else
+                             offerPrice=msrp;
 
                          if(currentProduct.has(Keys.EndpointProducts.KEY_IMAGES) && !currentProduct.isNull(Keys.EndpointProducts.KEY_IMAGES)) {
                              JSONObject images = currentProduct.getJSONObject(Keys.EndpointProducts.KEY_IMAGES);
@@ -172,14 +212,13 @@ public class FragmentSearch extends Fragment {
                              link = currentProduct.getString(Keys.EndpointProducts.KEY_LINK);
                          }
 
+
                          if(!id.equals("-1") && !label.equals(Constants.NA) ) {
                              Product product = new Product(id, label, msrp, offerPrice, link, image);
                              products.add(product);
                          }
 
                      }
-                     //L.T(getActivity(),listProducts.toString());
-
 
                  } catch (JSONException e) {
                      e.printStackTrace();
@@ -203,11 +242,96 @@ public class FragmentSearch extends Fragment {
         productsList.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapterProducts=new AdapterProducts(getActivity());
         productsList.setAdapter(adapterProducts);
-        sendJsonRequest();
+        productsList.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), productsList, new ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                L.T(getActivity(),Integer.toString(position));
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
+        }));
+        sendNewJsonRequest();
         return view;
     }
 
-    public static String getRequestUrl(){
-        return API_SOUQ_PRODUCTS_SEARCH+MyApplication.CLIENT_ID+MyApplication.API_KEY_SOUQ;
+    public  String getRequestUrl(){
+        return API_SOUQ_PRODUCTS_SEARCH1+query+API_SOUQ_PRODUCTS_SEARCH2+ MyApplication.CLIENT_ID+MyApplication.API_KEY_SOUQ;
     }
-}
+
+     @Override
+     public void onSortByName() {
+
+         productSorter.sortProductByName(listProducts);
+         adapterProducts.notifyDataSetChanged();
+
+     }
+
+     @Override
+     public void onSortByPrice() {
+
+         productSorter.sortProductByPrice(listProducts);
+         adapterProducts.notifyDataSetChanged();
+
+     }
+
+     public void newSearch(String q){
+         query=q;
+         sendNewJsonRequest();
+         adapterProducts.notifyDataSetChanged();
+
+     }
+
+     public void onCurrentSearch(){
+
+
+     }
+
+     class RecyclerTouchListener implements RecyclerView.OnItemTouchListener{
+         private GestureDetector gestureDetector;
+         private ClickListener clickListener;
+
+         public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final ClickListener clickListener){
+             this.clickListener=clickListener;
+             gestureDetector=new GestureDetector(context,new GestureDetector.SimpleOnGestureListener(){
+
+                 @Override
+                 public boolean onSingleTapUp(MotionEvent e) {
+                     return true;
+                 }
+
+                 @Override
+                 public void onLongPress(MotionEvent e) {
+                     View child= recyclerView.findChildViewUnder(e.getX(),e.getY());
+                     if(child!=null && clickListener!=null){
+                         clickListener.onLongClick(child,recyclerView.getChildPosition(child));
+                     }
+                 }
+             });
+
+         }
+
+         @Override
+         public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+
+             View child= rv.findChildViewUnder(e.getX(),e.getY());
+             if(child!=null && clickListener!=null && gestureDetector.onTouchEvent(e)){
+                 clickListener.onClick(rv,rv.getChildAdapterPosition(child));
+
+             }
+             return false;
+         }
+
+         @Override
+         public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+         }
+     }
+
+     public static interface ClickListener{
+         public void onClick(View view, int position);
+         public void onLongClick(View view,int position);
+
+     }
+ }

@@ -1,4 +1,4 @@
-package com.ahnaser.myfirstapp;
+package com.ahnaser.myfirstapp.pojo;
 
 /**
  * Created by root on 23/05/15.

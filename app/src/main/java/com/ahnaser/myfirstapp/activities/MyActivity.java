@@ -1,5 +1,7 @@
-package com.ahnaser.myfirstapp;
+package com.ahnaser.myfirstapp.activities;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -10,10 +12,12 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ImageSpan;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,18 +27,27 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ahnaser.myfirstapp.R;
+import com.ahnaser.myfirstapp.extras.SortListener;
+import com.ahnaser.myfirstapp.fragments.FragmentSearch;
+import com.ahnaser.myfirstapp.fragments.NavigationDrawerFragment;
 import com.ahnaser.myfirstapp.tabs.SlidingTabLayout;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 
 
-public class MyActivity extends ActionBarActivity {
+public class MyActivity extends ActionBarActivity implements View.OnClickListener {
 
+    private SearchView searchView;
     private Toolbar toolbar;
     private SlidingTabLayout mTabs;
     private ViewPager mPager;
     private static final int PRODUCT_SEARCH_RESULTS=0;
+    private static final String TAG_SORT_NAME = "sortName";
+    private static final String TAG_SORT_PRICE= "sortPrice";
+    private MyPagerAdapter adapter;
+    //Fragment fragment=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +60,11 @@ public class MyActivity extends ActionBarActivity {
         NavigationDrawerFragment drawerFragment= (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
         drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
 
+        //searchView=(SearchView)findViewById(R.id.searchView);
+
         mPager=(ViewPager) findViewById(R.id.pager);
-        mPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
+        adapter=new MyPagerAdapter(getSupportFragmentManager());
+        mPager.setAdapter(adapter);
         mTabs=(SlidingTabLayout) findViewById(R.id.tabs);
         mTabs.setDistributeEvenly(true);
         mTabs.setCustomTabView(R.layout.custome_tab_view, R.id.tabText);
@@ -69,18 +85,48 @@ public class MyActivity extends ActionBarActivity {
 
         SubActionButton buttonSortPrice = itemBuilder.setContentView(sortPrice).build();
         SubActionButton buttonSortName = itemBuilder.setContentView(sortName).build();
+        buttonSortName.setOnClickListener(this);
+        buttonSortPrice.setOnClickListener(this);
+        buttonSortName.setTag(TAG_SORT_NAME);
+        buttonSortPrice.setTag(TAG_SORT_PRICE);
 
         FloatingActionMenu actionMenu = new FloatingActionMenu.Builder(this)
                 .addSubActionView(buttonSortPrice)
                 .addSubActionView(buttonSortName)
                 .attachTo(actionButton)
                 .build();
+        handleIntent(getIntent());
+    }
+
+
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            //use the query to search your data somehow
+            //Fragment fragment=(Fragment)getSupportFragmentManager().findFragmentById(mPager.getCurrentItem());
+            Fragment fragment=adapter.getRegisteredFragment(mPager.getCurrentItem());
+            ((FragmentSearch)fragment).newSearch(query);
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_my, menu);
+
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) menu.findItem(R.id.searchView).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
         return true;
     }
 
@@ -108,9 +154,24 @@ public class MyActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onClick(View v) {
+        Fragment fragment= (Fragment) adapter.instantiateItem(mPager,mPager.getCurrentItem());
+        if (fragment instanceof SortListener) {
+            if (v.getTag().equals(TAG_SORT_NAME)) {
+                ((SortListener) fragment).onSortByName();
+            }
+            else if (v.getTag().equals(TAG_SORT_PRICE)) {
+                ((SortListener) fragment).onSortByPrice();
+            }
+        }
+
+    }
+
     class MyPagerAdapter extends FragmentStatePagerAdapter{
         String[] tabText=getResources().getStringArray(R.array.tabs);
-        int[] icons={R.drawable.ic_number1,R.drawable.ic_number2,R.drawable.ic_number3,};
+        int[] icons={R.drawable.ic_number1,R.drawable.ic_number2,R.drawable.ic_number3};
+        SparseArray<Fragment> registeredFragments = new SparseArray<Fragment>();
 
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -123,7 +184,7 @@ public class MyActivity extends ActionBarActivity {
 
             switch (position){
                 case PRODUCT_SEARCH_RESULTS:
-                    fragment=FragmentSearch.newInstance("","");
+                    fragment= FragmentSearch.newInstance("", "");
                     break;
                 case 1:
                     fragment=FragmentSearch.newInstance("","");
@@ -148,6 +209,23 @@ public class MyActivity extends ActionBarActivity {
         @Override
         public int getCount() {
             return 3;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            Fragment fragment = (Fragment) super.instantiateItem(container, position);
+            registeredFragments.put(position, fragment);
+            return fragment;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            registeredFragments.remove(position);
+            super.destroyItem(container, position, object);
+        }
+
+        public Fragment getRegisteredFragment(int position) {
+            return registeredFragments.get(position);
         }
     }
 

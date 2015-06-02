@@ -1,4 +1,4 @@
-package com.ahnaser.myfirstapp;
+package com.ahnaser.myfirstapp.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -7,6 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.ahnaser.myfirstapp.pojo.Information;
+import com.ahnaser.myfirstapp.R;
 
 import java.util.Collections;
 import java.util.List;

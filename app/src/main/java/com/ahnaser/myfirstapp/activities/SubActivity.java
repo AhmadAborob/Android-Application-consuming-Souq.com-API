@@ -1,4 +1,4 @@
-package com.ahnaser.myfirstapp;
+package com.ahnaser.myfirstapp.activities;
 
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
@@ -7,6 +7,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+
+import com.ahnaser.myfirstapp.R;
 
 
 public class SubActivity extends ActionBarActivity {

@@ -1,4 +1,4 @@
-package com.ahnaser.myfirstapp;
+package com.ahnaser.myfirstapp.activities;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -10,6 +10,9 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.ahnaser.myfirstapp.fragments.MyFragment;
+import com.ahnaser.myfirstapp.R;
 
 import it.neokree.materialtabs.MaterialTab;
 import it.neokree.materialtabs.MaterialTabHost;

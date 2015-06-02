@@ -1,4 +1,4 @@
-package com.ahnaser.myfirstapp;
+package com.ahnaser.myfirstapp.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -7,13 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
+import com.ahnaser.myfirstapp.R;
 
 /**
  * Created by root on 21/05/15.
@@ -39,7 +34,7 @@ public class MyFragment extends Fragment {
         }
 
 
-        RequestQueue requestQueue = VolleySingleton.getInstance().getRequestQueue();
+        /*RequestQueue requestQueue = VolleySingleton.getInstance().getRequestQueue();
 
         String url="https://api.souq.com/v1/products/5754385?country=ae&language=en&show_offers=0&show_attributes=1&show_variations=1&format=json&app_id=38607576&app_secret=EB008DQ5bnzmSZty8fyp";
         StringRequest stringRequest=new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
@@ -53,7 +48,7 @@ public class MyFragment extends Fragment {
                 Toast.makeText(getActivity(),"ERROR"+error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-        requestQueue.add(stringRequest);
+        requestQueue.add(stringRequest);*/
         return layout;
     }
 }

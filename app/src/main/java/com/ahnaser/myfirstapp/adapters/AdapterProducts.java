@@ -1,4 +1,4 @@
-package com.ahnaser.myfirstapp;
+package com.ahnaser.myfirstapp.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -8,6 +8,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.ahnaser.myfirstapp.extras.Constants;
+import com.ahnaser.myfirstapp.pojo.Product;
+import com.ahnaser.myfirstapp.R;
+import com.ahnaser.myfirstapp.network.VolleySingleton;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 

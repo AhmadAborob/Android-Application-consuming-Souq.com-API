@@ -24,4 +24,6 @@
     <string name="error_auth_failure">Authorization failed</string>
     <string name="error_network">Check you netowrk</string>
     <string name="error_parser">Oops! Data Received Was An Unreadable Mess</string>
+    <string name="search_title">searchView</string>
+    <string name="search_hint">Search For Anything</string>
 </resources>
