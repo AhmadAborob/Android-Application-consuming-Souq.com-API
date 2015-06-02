@@ -12,11 +12,6 @@
         android:orderInCategory="300"
         android:title="@string/using_tab_library"
         app:showAsAction="never" />
-    <item android:id="@+id/navigate"
-        android:title="@string/next"
-        android:orderInCategory="200"
-        app:showAsAction="always"
-        android:icon="@drawable/ic_next"/>
 
     <item android:id="@+id/searchView"
         android:title="@string/search_title"

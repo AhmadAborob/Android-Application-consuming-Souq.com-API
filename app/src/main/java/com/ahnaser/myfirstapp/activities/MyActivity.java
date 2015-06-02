@@ -112,7 +112,7 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
             //use the query to search your data somehow
             //Fragment fragment=(Fragment)getSupportFragmentManager().findFragmentById(mPager.getCurrentItem());
             Fragment fragment=adapter.getRegisteredFragment(mPager.getCurrentItem());
-            ((FragmentSearch)fragment).newSearch(query);
+            ((FragmentSearch) fragment).newSearch(query);
         }
     }
 
@@ -141,10 +141,6 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
         if (id == R.id.action_settings) {
             Toast.makeText(this,"Hey there"+item.getTitle(),Toast.LENGTH_SHORT).show();
             return true;
-        }
-
-        if (id==R.id.navigate){
-            startActivity(new Intent(this, SubActivity.class));
         }
 
         if (id==R.id.using_tab_library){

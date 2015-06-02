@@ -2,24 +2,25 @@
 
 
  import android.content.Context;
- import android.os.Bundle;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
- import android.view.GestureDetector;
- import android.view.LayoutInflater;
- import android.view.MotionEvent;
- import android.view.View;
+import android.view.GestureDetector;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.ahnaser.myfirstapp.MyApplication;
 import com.ahnaser.myfirstapp.R;
+import com.ahnaser.myfirstapp.activities.SubActivity;
 import com.ahnaser.myfirstapp.adapters.AdapterProducts;
 import com.ahnaser.myfirstapp.extras.Constants;
 import com.ahnaser.myfirstapp.extras.Keys;
- import com.ahnaser.myfirstapp.extras.L;
- import com.ahnaser.myfirstapp.extras.ProductSorter;
+import com.ahnaser.myfirstapp.extras.ProductSorter;
 import com.ahnaser.myfirstapp.extras.SortListener;
 import com.ahnaser.myfirstapp.network.VolleySingleton;
 import com.ahnaser.myfirstapp.pojo.Product;
@@ -33,7 +34,6 @@ import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONArray;
@@ -62,7 +62,6 @@ public class FragmentSearch extends Fragment implements SortListener {
      private static String API_SOUQ_PRODUCTS_SEARCH2="&&page=1&show=20&show_attributes=0&country=ae&language=en&format=json";
      int current,totalPages;
      private VolleySingleton volleySingleton;
-    private ImageLoader imageLoader;
      private RequestQueue requestQueue;
     private ArrayList<Product> listProducts=new ArrayList<>();
     private RecyclerView productsList;
@@ -112,7 +111,6 @@ public class FragmentSearch extends Fragment implements SortListener {
             public void onResponse(JSONObject response) {
                 textVolleyError.setVisibility(View.GONE);
                 listProducts=parseJSONRequest(response);
-                L.T(getActivity(), Integer.toString(totalPages) + "  " + Integer.toString(current));
                 adapterProducts.setListProducts(listProducts);
 
             }
@@ -245,12 +243,13 @@ public class FragmentSearch extends Fragment implements SortListener {
         productsList.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), productsList, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                L.T(getActivity(),Integer.toString(position));
+                Intent intent= new Intent(getActivity(),SubActivity.class);
+                intent.putExtra("productID",listProducts.get(position).getId());
+                startActivity(intent);
             }
 
             @Override
             public void onLongClick(View view, int position) {
-
             }
         }));
         sendNewJsonRequest();

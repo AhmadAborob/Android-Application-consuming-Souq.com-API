@@ -17,6 +17,9 @@ public class Keys {
         public static final String KEY_META = "meta";
         public static final String KEY_PAGES = "pages";
         public static final String KEY_PAGE = "page";
-        public static final String KEY_TOLTAL = "total";
+        public static final String KEY_TOTAL = "total";
+        public static final String KEY_ATTRIBUTES_GROUPS="attributes_groups";
+        public static final String KEY_ATTRIBUTES="attributes";
+        public static final String KEY_DESCRIPTION_VALUE="value";
     }
 }

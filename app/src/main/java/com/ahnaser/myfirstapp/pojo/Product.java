@@ -10,6 +10,7 @@ public class Product {
     private String offerPrice;
     private String link;
     private String imageLink;
+    private String description;
 
     public Product(String id, String label, String msrp, String offerPrice, String link, String imageLink) {
         this.id = id;
@@ -18,6 +19,16 @@ public class Product {
         this.offerPrice = offerPrice;
         this.link = link;
         this.imageLink = imageLink;
+    }
+
+    public Product(String id, String label, String msrp, String offerPrice, String link, String imageLink, String description) {
+        this.id = id;
+        this.label = label;
+        this.msrp = msrp;
+        this.offerPrice = offerPrice;
+        this.link = link;
+        this.imageLink = imageLink;
+        this.description = description;
     }
 
     public String getId() {
@@ -66,6 +77,14 @@ public class Product {
 
     public void setImageLink(String imageLink) {
         this.imageLink = imageLink;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String toString(){

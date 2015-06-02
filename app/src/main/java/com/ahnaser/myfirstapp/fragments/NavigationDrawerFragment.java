@@ -18,7 +18,6 @@ import android.view.ViewGroup;
 
 import com.ahnaser.myfirstapp.R;
 import com.ahnaser.myfirstapp.adapters.Adapter;
-import com.ahnaser.myfirstapp.extras.L;
 import com.ahnaser.myfirstapp.pojo.Information;
 
 import java.util.ArrayList;
@@ -68,12 +67,10 @@ public class NavigationDrawerFragment extends Fragment //implements Adapter.Clic
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), recyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                L.m(Integer.toString(position));
             }
 
             @Override
             public void onLongClick(View view, int position) {
-                L.m(Integer.toString(position));
             }
         }));
         return layout;
