@@ -11,6 +11,8 @@ public class Keys {
         public static final String KEY_LABEL = "label";
         public static final String KEY_IMAGES = "images";
         public static final String KEY_SMALL = "S";
+        public static final String KEY_LARGE="L";
+        public static final String KEY_MEDIUM ="M";
         public static final String KEY_MARKET_PRICE = "msrp";
         public static final String KEY_OFFER_PRICE = "offer_price";
         public static final String KEY_LINK = "link";

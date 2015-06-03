@@ -59,8 +59,9 @@ public class FragmentSearch extends Fragment implements SortListener {
 
     private String query="iphone";
     private static String API_SOUQ_PRODUCTS_SEARCH1="https://api.souq.com/v1/products?q=";
-     private static String API_SOUQ_PRODUCTS_SEARCH2="&&page=1&show=20&show_attributes=0&country=ae&language=en&format=json";
-     int current,totalPages;
+     private static String API_SOUQ_PRODUCTS_SEARCH2="&&page=";
+     private static String API_SOUQ_PRODUCTS_SEARCH3="&show=20&show_attributes=0&country=ae&language=en&format=json";
+     private int current=1,totalPages=1,totalItems=1;
      private VolleySingleton volleySingleton;
      private RequestQueue requestQueue;
     private ArrayList<Product> listProducts=new ArrayList<>();
@@ -68,6 +69,11 @@ public class FragmentSearch extends Fragment implements SortListener {
     private AdapterProducts adapterProducts;
     private TextView textVolleyError;
      private ProductSorter productSorter=new ProductSorter();
+     private int previousTotal = 0;
+     private boolean loading = true;
+     private int visibleThreshold = 5;
+     private int firstVisibleItem, visibleItemCount, totalItemCount;
+     private LinearLayoutManager mLayoutManager;
 
     /**
      * Use this factory method to create a new instance of
@@ -101,6 +107,7 @@ public class FragmentSearch extends Fragment implements SortListener {
 
         volleySingleton=VolleySingleton.getInstance();
         requestQueue=volleySingleton.getRequestQueue();
+        mLayoutManager=new LinearLayoutManager(getActivity());
         //sendJsonRequest();
 
     }
@@ -159,9 +166,15 @@ public class FragmentSearch extends Fragment implements SortListener {
                      } catch (JSONException e) {
                          e.printStackTrace();
                      }
-                     if(this.totalPages>=1){
-                         this.current=1;
+                 }
+
+                 if(meta.has(Keys.EndpointProducts.KEY_TOTAL) && !meta.isNull(Keys.EndpointProducts.KEY_TOTAL)){
+                     try {
+                         this.totalItems=meta.getInt(Keys.EndpointProducts.KEY_TOTAL);
+                     } catch (JSONException e) {
+                         e.printStackTrace();
                      }
+
                  }
 
              }
@@ -233,18 +246,19 @@ public class FragmentSearch extends Fragment implements SortListener {
      @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         View view= inflater.inflate(R.layout.fragment_search, container, false);
         textVolleyError=(TextView) view.findViewById(R.id.textVolleyError);
         productsList=(RecyclerView) view.findViewById(R.id.listProducts);
-        productsList.setLayoutManager(new LinearLayoutManager(getActivity()));
+        productsList.setLayoutManager(mLayoutManager);
         adapterProducts=new AdapterProducts(getActivity());
         productsList.setAdapter(adapterProducts);
         productsList.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), productsList, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                Intent intent= new Intent(getActivity(),SubActivity.class);
-                intent.putExtra("productID",listProducts.get(position).getId());
+                Intent intent = new Intent(getActivity(), SubActivity.class);
+                intent.putExtra("productID", listProducts.get(position).getId());
                 startActivity(intent);
             }
 
@@ -252,12 +266,38 @@ public class FragmentSearch extends Fragment implements SortListener {
             public void onLongClick(View view, int position) {
             }
         }));
+
+        productsList.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                visibleItemCount = productsList.getChildCount();
+                totalItemCount = mLayoutManager.getItemCount();
+                firstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
+
+                if (loading) {
+                    if (totalItemCount > previousTotal) {
+                        loading = false;
+                        previousTotal = totalItemCount;
+                    }
+                }
+                if (!loading && (totalItemCount - visibleItemCount)
+                        <= (firstVisibleItem + visibleThreshold)) {
+                    current++;
+                    if(current<=totalPages)
+                        onCurrentSearch();
+                    loading = true;
+                }
+            }
+        });
+
         sendNewJsonRequest();
         return view;
     }
 
     public  String getRequestUrl(){
-        return API_SOUQ_PRODUCTS_SEARCH1+query+API_SOUQ_PRODUCTS_SEARCH2+ MyApplication.CLIENT_ID+MyApplication.API_KEY_SOUQ;
+        return API_SOUQ_PRODUCTS_SEARCH1+query+API_SOUQ_PRODUCTS_SEARCH2+Integer.toString(current)+API_SOUQ_PRODUCTS_SEARCH3+ MyApplication.CLIENT_ID+MyApplication.API_KEY_SOUQ;
     }
 
      @Override
@@ -284,7 +324,38 @@ public class FragmentSearch extends Fragment implements SortListener {
      }
 
      public void onCurrentSearch(){
+         JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, getRequestUrl(),(String) null, new Response.Listener<JSONObject>() {
+             @Override
+             public void onResponse(JSONObject response) {
+                 textVolleyError.setVisibility(View.GONE);
+                 listProducts.addAll(parseJSONRequest(response));
+                 adapterProducts.setListProducts(listProducts);
 
+             }
+         }, new Response.ErrorListener() {
+             @Override
+             public void onErrorResponse(VolleyError error) {
+                 textVolleyError.setVisibility(View.VISIBLE);
+                 if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                     textVolleyError.setText(R.string.error_timeout);
+
+                 } else if (error instanceof AuthFailureError) {
+                     textVolleyError.setText(R.string.error_auth_failure);
+                     //TODO
+                 } else if (error instanceof ServerError) {
+                     textVolleyError.setText(R.string.error_auth_failure);
+                     //TODO
+                 } else if (error instanceof NetworkError) {
+                     textVolleyError.setText(R.string.error_network);
+                     //TODO
+                 } else if (error instanceof ParseError) {
+                     textVolleyError.setText(R.string.error_parser);
+                     //TODO
+                 }
+
+             }
+         });
+         requestQueue.add(request);
 
      }
 
@@ -331,6 +402,10 @@ public class FragmentSearch extends Fragment implements SortListener {
      public static interface ClickListener{
          public void onClick(View view, int position);
          public void onLongClick(View view,int position);
+
+     }
+
+     class onScroll extends RecyclerView.OnScrollListener {
 
      }
  }

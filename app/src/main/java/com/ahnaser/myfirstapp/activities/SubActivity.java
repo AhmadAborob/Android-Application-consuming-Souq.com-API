@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -42,6 +43,8 @@ public class SubActivity extends ActionBarActivity {
     private ImageLoader imageLoader;
     private TextView textVolleyError;
     private ImageView productImage;
+    private TextView productLabel,marketPrice,offerPrice;
+    private WebView description;
     private String productID;
     private static String API_SOUQ_PRODUCTS1="https://api.souq.com/v1/products/";
     private static String API_SOUQ_PRODUCTS2="?country=ae&language=en&show_offers=0&show_attributes=1&show_variations=1&format=json";
@@ -59,6 +62,10 @@ public class SubActivity extends ActionBarActivity {
         imageLoader=volleySingleton.getImageLoader();
         textVolleyError=(TextView) findViewById(R.id.textVolleyError);
         productImage=(ImageView) findViewById(R.id.productImage);
+        productLabel=(TextView) findViewById(R.id.productLabel);
+        marketPrice =(TextView) findViewById(R.id.marketPrice);
+        offerPrice=(TextView) findViewById(R.id.offerPrice);
+        description=(WebView) findViewById(R.id.description);
 
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -130,18 +137,24 @@ public class SubActivity extends ActionBarActivity {
                 }
 
                 if (currentProduct.has(Keys.EndpointProducts.KEY_MARKET_PRICE) && !currentProduct.isNull(Keys.EndpointProducts.KEY_MARKET_PRICE)) {
-                    msrp = "Price: " + currentProduct.getString(Keys.EndpointProducts.KEY_MARKET_PRICE) + " AED";
+                    msrp = "Market Price: " + currentProduct.getString(Keys.EndpointProducts.KEY_MARKET_PRICE) + " AED";
                 }
 
                 if (currentProduct.has(Keys.EndpointProducts.KEY_OFFER_PRICE) && !currentProduct.isNull(Keys.EndpointProducts.KEY_OFFER_PRICE))
-                    offerPrice = "Price: " + currentProduct.getString(Keys.EndpointProducts.KEY_OFFER_PRICE) + " AED";
+                    offerPrice = "Offer Price: " + currentProduct.getString(Keys.EndpointProducts.KEY_OFFER_PRICE) + " AED";
                 else
                     offerPrice = msrp;
 
                 if (currentProduct.has(Keys.EndpointProducts.KEY_IMAGES) && !currentProduct.isNull(Keys.EndpointProducts.KEY_IMAGES)) {
                     JSONObject images = currentProduct.getJSONObject(Keys.EndpointProducts.KEY_IMAGES);
 
-                    if (images.has(Keys.EndpointProducts.KEY_SMALL) && !images.isNull(Keys.EndpointProducts.KEY_SMALL)) {
+                    if (images.has(Keys.EndpointProducts.KEY_LARGE) && !images.isNull(Keys.EndpointProducts.KEY_LARGE)) {
+                        image = images.getJSONArray(Keys.EndpointProducts.KEY_LARGE).getString(0);
+                    }
+                    else if (images.has(Keys.EndpointProducts.KEY_MEDIUM) && !images.isNull(Keys.EndpointProducts.KEY_MEDIUM)) {
+                        image = images.getJSONArray(Keys.EndpointProducts.KEY_MEDIUM).getString(0);
+                    }
+                    else if (images.has(Keys.EndpointProducts.KEY_SMALL) && !images.isNull(Keys.EndpointProducts.KEY_SMALL)) {
                         image = images.getJSONArray(Keys.EndpointProducts.KEY_SMALL).getString(0);
                     }
                 }
@@ -187,6 +200,11 @@ public class SubActivity extends ActionBarActivity {
                 }
             });
         }
+
+        productLabel.setText(product.getLabel());
+        marketPrice.setText(product.getMsrp());
+        offerPrice.setText(product.getOfferPrice());
+        description.loadData(product.getDescription(),"text/html",null);
     }
 
 
