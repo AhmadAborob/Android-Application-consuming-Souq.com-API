@@ -318,9 +318,12 @@ public class FragmentSearch extends Fragment implements SortListener {
 
      public void newSearch(String q){
          query=q;
+         current=1;
+         totalPages=1;
+         totalItems=1;
+         adapterProducts=new AdapterProducts(getActivity());
+         productsList.setAdapter(adapterProducts);
          sendNewJsonRequest();
-         adapterProducts.notifyDataSetChanged();
-
      }
 
      public void onCurrentSearch(){
@@ -329,8 +332,8 @@ public class FragmentSearch extends Fragment implements SortListener {
              public void onResponse(JSONObject response) {
                  textVolleyError.setVisibility(View.GONE);
                  listProducts.addAll(parseJSONRequest(response));
-                 adapterProducts.setListProducts(listProducts);
-
+                 //adapterProducts.setListProducts(listProducts);
+                 adapterProducts.notifyDataSetChanged();
              }
          }, new Response.ErrorListener() {
              @Override
