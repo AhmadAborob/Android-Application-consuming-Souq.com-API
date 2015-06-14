@@ -28,13 +28,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahnaser.myfirstapp.R;
+import com.ahnaser.myfirstapp.extras.L;
 import com.ahnaser.myfirstapp.extras.SortListener;
 import com.ahnaser.myfirstapp.fragments.FragmentSearch;
 import com.ahnaser.myfirstapp.fragments.NavigationDrawerFragment;
 import com.ahnaser.myfirstapp.tabs.SlidingTabLayout;
+import com.ahnaser.souqapi.SouqAPIConnection;
+import com.android.volley.VolleyError;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class MyActivity extends ActionBarActivity implements View.OnClickListener {
@@ -96,8 +106,38 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
                 .attachTo(actionButton)
                 .build();
         handleIntent(getIntent());
+
+        test();
     }
 
+    private void test(){
+        SouqAPIConnection connection=new SouqAPIConnection("38607576","EB008DQ5bnzmSZty8fyp",this);
+        //AccessToken accessToken=new AccessToken("yEHNp35GBnN3vids2T9oWLOcGCKz0AFtHlB2ie9h","9190178");
+        //connection.setAccessToken(accessToken);
+        Map<String,String> params=new HashMap<String,String>();
+        params.put("product_id", "5754385");
+        connection.setResponseObserver(new SouqAPIConnection.ResponseObserver() {
+            @Override
+            public void onError(VolleyError error) {
+
+                L.T(getApplicationContext(), "ERROR");
+            }
+
+            @Override
+            public void onSuccess(JSONObject response) {
+
+                JSONObject data=new JSONObject();
+                try {
+                    JSONArray arr=response.getJSONArray("data");
+                    data.put("data",arr);
+                    L.T(getApplicationContext(), data.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        connection.get("offers", params);
+    }
 
 
     @Override

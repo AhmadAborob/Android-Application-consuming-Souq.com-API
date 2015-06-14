@@ -1,11 +1,10 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
 
     defaultConfig {
-        applicationId "com.ahnaser.myfirstapp"
         minSdkVersion 15
         targetSdkVersion 22
         versionCode 1
@@ -21,12 +20,6 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:support-v4:22.1.1'
-    compile 'com.android.support:appcompat-v7:22.1.1'
-    compile 'com.android.support:recyclerview-v7:22.1.1'
-    compile 'org.lucasr.dspec:dspec:0.1.1'
-    compile 'it.neokree:MaterialTabs:0.11'
+    compile 'com.android.support:appcompat-v7:22.2.0'
     compile 'com.mcxiaoke.volley:library:1.0.+'
-    compile 'com.oguzdev:CircularFloatingActionMenu:1.0.2'
-    compile project(':souqapi')
 }

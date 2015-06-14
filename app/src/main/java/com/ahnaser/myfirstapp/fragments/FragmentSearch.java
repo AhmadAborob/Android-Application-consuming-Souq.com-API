@@ -41,6 +41,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
  /**
  * A simple {@link Fragment} subclass.
@@ -74,6 +75,9 @@ public class FragmentSearch extends Fragment implements SortListener {
      private int visibleThreshold = 5;
      private int firstVisibleItem, visibleItemCount, totalItemCount;
      private LinearLayoutManager mLayoutManager;
+     HashMap <String,String> params;
+     JSONObject paraobj;
+
 
     /**
      * Use this factory method to create a new instance of
@@ -108,11 +112,10 @@ public class FragmentSearch extends Fragment implements SortListener {
         volleySingleton=VolleySingleton.getInstance();
         requestQueue=volleySingleton.getRequestQueue();
         mLayoutManager=new LinearLayoutManager(getActivity());
-        //sendJsonRequest();
-
     }
 
-    private void sendNewJsonRequest(){
+     private void sendNewJsonRequest(){
+
         JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, getRequestUrl(),(String) null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -297,7 +300,7 @@ public class FragmentSearch extends Fragment implements SortListener {
     }
 
     public  String getRequestUrl(){
-        return API_SOUQ_PRODUCTS_SEARCH1+query+API_SOUQ_PRODUCTS_SEARCH2+Integer.toString(current)+API_SOUQ_PRODUCTS_SEARCH3+ MyApplication.CLIENT_ID+MyApplication.API_KEY_SOUQ;
+        return API_SOUQ_PRODUCTS_SEARCH1+query+API_SOUQ_PRODUCTS_SEARCH2+Integer.toString(current)+API_SOUQ_PRODUCTS_SEARCH3+MyApplication.CLIENT_ID+ MyApplication.API_KEY_SOUQ;
     }
 
      @Override
