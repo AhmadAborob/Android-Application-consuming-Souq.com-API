@@ -258,10 +258,22 @@ public class SouqAPIConnection {
 
     public String getAuthenticationUrl(String redirectUrl, String scopes){
         Map<String,String> params=new HashMap<String,String>();
+        params.put("redirect_uri",redirectUrl);
         params.put("client_id",clientId);
         params.put("response_type","code");
         params.put("scope",scopes);
         params.put("redirect_uri",redirectUrl);
+
+        return apiBaseUrl+authorizeUrl+"?"+HttpBuildQuery(params);
+    }
+
+    public String getAuthenticationUrl(String redirectUrl, String scopes, String state){
+        Map<String,String> params=new HashMap<String,String>();
+        params.put("redirect_uri",redirectUrl);
+        params.put("client_id",clientId);
+        params.put("response_type","code");
+        params.put("scope",scopes);
+        params.put("state",state);
 
         return apiBaseUrl+authorizeUrl+"?"+HttpBuildQuery(params);
     }
