@@ -57,7 +57,6 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
     private static final String TAG_SORT_NAME = "sortName";
     private static final String TAG_SORT_PRICE= "sortPrice";
     private MyPagerAdapter adapter;
-    //Fragment fragment=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +106,7 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
                 .build();
         handleIntent(getIntent());
 
-        test();
+        //test();
     }
 
     private void test(){
@@ -185,6 +184,10 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
 
         if (id==R.id.using_tab_library){
             startActivity(new Intent(this,ActivityUsingTabLibrary.class));
+        }
+
+        if(id==R.id.oauth_example){
+            startActivity(new Intent(this,OauthExample.class));
         }
 
         return super.onOptionsItemSelected(item);

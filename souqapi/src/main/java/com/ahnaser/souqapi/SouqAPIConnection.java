@@ -15,8 +15,6 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -26,6 +24,8 @@ public class SouqAPIConnection {
     private static final String KEY_ACCESS_TOKEN = "access_token";
     private static final String KEY_APP_ID = "app_id";
     private static final String KEY_APP_SECRET = "app_secret";
+    private static final String KEY_CLIENT_ID="client_id";
+    private static final String KEY_CLIENT_SECRET="client_secret";
     private static final String KEY_LANGUAGE = "language";
     private static final String KEY_COUNTRY = "country";
     private static final String KEY_CUSTOMER_ID = "customer_id";
@@ -114,34 +114,64 @@ public class SouqAPIConnection {
 
     private String generateUrl(String uri,Map<String,String> paramss){
         Map<String,String> params=new HashMap<String, String>();
+        StringBuilder url = new StringBuilder();
 
-        params.put(KEY_APP_ID, clientId);
-        params.put(KEY_APP_SECRET,clientSecret);
-        params.put(KEY_COUNTRY,defaultCountry);
-        params.put(KEY_LANGUAGE,defaultLanguage);
+        if (uri!=accessTokenUrl) {
 
-        if(paramss!=null){
-            if(!paramss.isEmpty()){
-                params.putAll(paramss);
+            params.put(KEY_APP_ID, clientId);
+            params.put(KEY_APP_SECRET, clientSecret);
+            params.put(KEY_COUNTRY, defaultCountry);
+            params.put(KEY_LANGUAGE, defaultLanguage);
+
+            if (paramss != null) {
+                if (!paramss.isEmpty()) {
+                    params.putAll(paramss);
+                }
             }
-        }
 
-        Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
-        StringBuilder url=new StringBuilder();
-
-        if (iterator.hasNext()) {
-            url.append('?');
-        }
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> param = iterator.next();
-            url.append(param.getKey()).append('=')
-                    .append(param.getValue());
+            Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
             if (iterator.hasNext()) {
-                url.append('&');
+                url.append('?');
+            }
+            while (iterator.hasNext()) {
+                Map.Entry<String, String> param = iterator.next();
+                url.append(param.getKey()).append('=')
+                        .append(param.getValue());
+                if (iterator.hasNext()) {
+                    url.append('&');
+                }
             }
         }
+        else {
 
-        return apiUrl+uri+url.toString();
+            params.put(KEY_CLIENT_ID, clientId);
+            params.put(KEY_CLIENT_SECRET, clientSecret);
+
+            if (paramss != null) {
+                if (!paramss.isEmpty()) {
+                    params.putAll(paramss);
+                }
+            }
+
+            Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
+            if (iterator.hasNext()) {
+                url.append('?');
+            }
+            while (iterator.hasNext()) {
+                Map.Entry<String, String> param = iterator.next();
+                url.append(param.getKey()).append('=')
+                        .append(param.getValue());
+                if (iterator.hasNext()) {
+                    url.append('&');
+                }
+            }
+        }
+        if (uri==accessTokenUrl) {
+            return apiBaseUrl + uri + url.toString();
+        }
+        else{
+            return apiUrl+uri+url.toString();
+        }
     }
 
     public void get(String uri){
@@ -289,7 +319,6 @@ private String HttpBuildQuery(Map<String,String> params) {
             url.append('&');
         }
     }
-
    return url.toString();
 }
 
@@ -297,11 +326,12 @@ private String HttpBuildQuery(Map<String,String> params) {
         Map<String,String> params=new HashMap<String,String>();
         params.put("code", code);
         params.put("grant_type", "authorization_code");
-        try {
+        params.put("redirect_uri", redirectUrl);
+        /*try {
             params.put("redirect_uri", URLEncoder.encode(redirectUrl, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-        }
+        }*/
 
         this.setResponseObserver(new ResponseObserver() {
             @Override
@@ -316,6 +346,7 @@ private String HttpBuildQuery(Map<String,String> params) {
                 try {
                     value=apiResult.getData().getString("access_token");
                     customerId=apiResult.getData().getString("customer_id");
+                    Log.v("CUSTOMER ID: ", customerId);
                     accessToken=new AccessToken(value,customerId,scopes);
                     setAccessToken(accessToken);
                 } catch (JSONException e) {

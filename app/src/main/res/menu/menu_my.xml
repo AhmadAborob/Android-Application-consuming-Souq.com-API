@@ -13,10 +13,17 @@
         android:title="@string/using_tab_library"
         app:showAsAction="never" />
 
-    <item android:id="@+id/searchView"
-        android:title="@string/search_title"
+    <item
+        android:id="@+id/oauth_example"
+        android:orderInCategory="300"
+        android:title="@string/oauth_example"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/searchView"
         android:icon="@drawable/ic_search"
-        app:showAsAction="collapseActionView|ifRoom"
-        app:actionViewClass="android.support.v7.widget.SearchView" />
+        android:title="@string/search_title"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="collapseActionView|ifRoom" />
 
 </menu>
