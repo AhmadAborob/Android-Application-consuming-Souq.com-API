@@ -10,6 +10,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
@@ -44,6 +45,7 @@ public class SouqAPIConnection {
     private int status;
     private Context context;
 
+
     public interface ResponseObserver
     {
         void onError(VolleyError error);
@@ -65,7 +67,16 @@ public class SouqAPIConnection {
 
     private void apiCall(int method, String uri, final Map<String,String> params){
 
-        JsonObjectRequest request=new JsonObjectRequest(method, generateUrl(uri,params), new Response.Listener<JSONObject>() {
+        JSONObject parameters=new JSONObject(params);
+
+        String paramsStr;
+        if (uri==accessTokenUrl) {
+            paramsStr = generateUrl(uri, null);
+        }
+        else {
+            paramsStr = generateUrl(uri, params);
+        }
+        JsonObjectRequest request=new JsonObjectRequest(method, paramsStr,parameters, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 apiResult=new SouqAPIResult(status,response);
@@ -75,6 +86,7 @@ public class SouqAPIConnection {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                Log.v("ERROR: ", error.toString());
                 apiResult=new SouqAPIResult(error.networkResponse.statusCode,new JSONObject());
                 mObserver.onError(error);
             }
@@ -82,12 +94,10 @@ public class SouqAPIConnection {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 if(accessToken!=null){
-                    Map<String, String> headers = new HashMap<String,String>();
                     params.put(KEY_ACCESS_TOKEN,accessToken.getValue());
                     params.put(KEY_CUSTOMER_ID,accessToken.getCustomerId());
                     return params;
                 }
-
                 return super.getParams();
             }
 
@@ -144,8 +154,8 @@ public class SouqAPIConnection {
         }
         else {
 
-            params.put(KEY_CLIENT_ID, clientId);
-            params.put(KEY_CLIENT_SECRET, clientSecret);
+            //params.put(KEY_CLIENT_ID, clientId);
+            //params.put(KEY_CLIENT_SECRET, clientSecret);
 
             if (paramss != null) {
                 if (!paramss.isEmpty()) {
@@ -167,6 +177,7 @@ public class SouqAPIConnection {
             }
         }
         if (uri==accessTokenUrl) {
+            Log.v("ACCESS TOKEN: ", apiBaseUrl + uri + url.toString());
             return apiBaseUrl + uri + url.toString();
         }
         else{
@@ -322,17 +333,64 @@ private String HttpBuildQuery(Map<String,String> params) {
    return url.toString();
 }
 
-    public void setAccessTokenFromServer(String code, String redirectUrl, final String scopes){
-        Map<String,String> params=new HashMap<String,String>();
-        params.put("code", code);
-        params.put("grant_type", "authorization_code");
-        params.put("redirect_uri", redirectUrl);
-        /*try {
-            params.put("redirect_uri", URLEncoder.encode(redirectUrl, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }*/
+    public void setAccessTokenFromServer(final String code, final String redirectUrl, final String scopes){
 
+        StringRequest stringRequest=new StringRequest(Request.Method.POST,generateUrl(accessTokenUrl,null),
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.v("STATUS CODE: ", Integer.toString(status));
+
+                        try {
+                            JSONObject result=new JSONObject(response);
+                            apiResult=new SouqAPIResult(status,result);
+                            try {
+                                AccessToken access_Token;
+                                String value,customerId;
+                                value=apiResult.getData().getString("access_token");
+                                customerId=apiResult.getData().getString("customer_id");
+                                access_Token=new AccessToken(value,customerId,scopes);
+                                setAccessToken(access_Token);
+
+                                Log.v("VALUE: ", accessToken.getValue());
+                                Log.v("CUSTOMER ID: ", accessToken.getCustomerId());
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.v("STATUS CODE: ", Integer.toString(error.networkResponse.statusCode));
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params=new HashMap<String,String>();
+                params.put("code", code);
+                params.put(KEY_CLIENT_ID, clientId);
+                params.put(KEY_CLIENT_SECRET, clientSecret);
+                params.put("redirect_uri", redirectUrl);
+                params.put("grant_type", "authorization_code");
+                return params;
+            }
+
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                status=response.statusCode;
+                return super.parseNetworkResponse(response);
+            }
+        };
+
+        requestQueue.add(stringRequest);
+
+        /*
         this.setResponseObserver(new ResponseObserver() {
             @Override
             public void onError(VolleyError error) {
@@ -356,5 +414,6 @@ private String HttpBuildQuery(Map<String,String> params) {
         });
 
         this.post(this.accessTokenUrl, params);
+        */
     }
 }

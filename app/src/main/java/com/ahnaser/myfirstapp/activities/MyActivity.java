@@ -33,6 +33,7 @@ import com.ahnaser.myfirstapp.extras.SortListener;
 import com.ahnaser.myfirstapp.fragments.FragmentSearch;
 import com.ahnaser.myfirstapp.fragments.NavigationDrawerFragment;
 import com.ahnaser.myfirstapp.tabs.SlidingTabLayout;
+import com.ahnaser.souqapi.AccessToken;
 import com.ahnaser.souqapi.SouqAPIConnection;
 import com.android.volley.VolleyError;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
@@ -106,20 +107,21 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
                 .build();
         handleIntent(getIntent());
 
-        //test();
+        test();
     }
 
     private void test(){
         SouqAPIConnection connection=new SouqAPIConnection("38607576","EB008DQ5bnzmSZty8fyp",this);
-        //AccessToken accessToken=new AccessToken("yEHNp35GBnN3vids2T9oWLOcGCKz0AFtHlB2ie9h","9190178");
-        //connection.setAccessToken(accessToken);
+        AccessToken accessToken=new AccessToken("aSW5tbq5ssE1LJmtfTsqpIydmD8pK6wpnwXDsWhu","9190178");
+        connection.setAccessToken(accessToken);
         Map<String,String> params=new HashMap<String,String>();
-        params.put("product_id", "5754385");
+        params.put("cart_id","36141702");
+        params.put("offer_id", "37725300033");
         connection.setResponseObserver(new SouqAPIConnection.ResponseObserver() {
             @Override
             public void onError(VolleyError error) {
 
-                L.T(getApplicationContext(), "ERROR");
+                L.T(getApplicationContext(), Integer.toString(error.networkResponse.statusCode));
             }
 
             @Override
@@ -135,7 +137,7 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
                 }
             }
         });
-        connection.get("offers", params);
+        connection.delete("carts/36141702/offers/37725300033", params);
     }
 
 

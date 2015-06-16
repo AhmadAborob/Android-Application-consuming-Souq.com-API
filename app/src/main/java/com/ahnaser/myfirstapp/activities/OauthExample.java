@@ -12,6 +12,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.ahnaser.myfirstapp.R;
+import com.ahnaser.myfirstapp.extras.L;
 import com.ahnaser.souqapi.SouqAPIConnection;
 
 public class OauthExample extends ActionBarActivity {
@@ -25,6 +26,10 @@ public class OauthExample extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_oauth_example);
+        test();
+    }
+
+    void test(){
         connection=new SouqAPIConnection("38607576","EB008DQ5bnzmSZty8fyp",this);
 
         webView=(WebView) findViewById(R.id.webView);
@@ -36,10 +41,11 @@ public class OauthExample extends ActionBarActivity {
             public void onPageFinished(WebView view, String url) {
                 //This method will be executed each time a page finished loading.
                 //The only we do is dismiss the progressDialog, in case we are showing any.
-                if(pd!=null && pd.isShowing()){
+                if (pd != null && pd.isShowing()) {
                     pd.dismiss();
                 }
             }
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.startsWith("https://api.souq.com/oauth/authorize/")) {
@@ -53,10 +59,9 @@ public class OauthExample extends ActionBarActivity {
                     }
                     Log.i("Authorize", "Auth token received: " + authorizationToken);
 
-                    connection.setAccessTokenFromServer(authorizationToken,"https://api.souq.com/oauth/authorize/","customer_profile,cart_management,customer_demographics,customer_profile,cart_management,customer_demographics");
-                }
-                else {
-                    Log.i("Authorize","Redirecting to: "+url);
+                    connection.setAccessTokenFromServer(authorizationToken, "https://api.souq.com/oauth/authorize/", "customer_profile,cart_management,customer_demographics,customer_profile,cart_management,customer_demographics");
+                } else {
+                    Log.i("Authorize", "Redirecting to: " + url);
                     webView.loadUrl(url);
                 }
                 return true;
@@ -67,7 +72,6 @@ public class OauthExample extends ActionBarActivity {
         Log.i("Authorize","Loading Auth Url: "+authUrl);
         //Load the authorization URL into the webView
         webView.loadUrl(authUrl);
-
     }
 
     @Override
