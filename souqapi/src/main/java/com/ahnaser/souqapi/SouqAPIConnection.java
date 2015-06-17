@@ -2,6 +2,7 @@ package com.ahnaser.souqapi;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -352,8 +353,10 @@ private String HttpBuildQuery(Map<String,String> params) {
                                 access_Token=new AccessToken(value,customerId,scopes);
                                 setAccessToken(access_Token);
 
-                                Log.v("VALUE: ", accessToken.getValue());
-                                Log.v("CUSTOMER ID: ", accessToken.getCustomerId());
+                                Toast.makeText(context, "VALUE: " + accessToken.getValue(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "CUSTOMER ID: " + accessToken.getCustomerId(), Toast.LENGTH_SHORT).show();
+                                //Log.v("VALUE: ", accessToken.getValue());
+                                //Log.v("CUSTOMER ID: ", accessToken.getCustomerId());
 
                             } catch (JSONException e) {
                                 e.printStackTrace();

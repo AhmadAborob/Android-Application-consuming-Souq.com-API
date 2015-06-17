@@ -107,7 +107,7 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
                 .build();
         handleIntent(getIntent());
 
-        test();
+        //test();
     }
 
     private void test(){
