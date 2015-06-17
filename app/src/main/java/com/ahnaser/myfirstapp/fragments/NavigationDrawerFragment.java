@@ -4,6 +4,7 @@ package com.ahnaser.myfirstapp.fragments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -15,13 +16,22 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.ahnaser.myfirstapp.R;
 import com.ahnaser.myfirstapp.adapters.Adapter;
 import com.ahnaser.myfirstapp.pojo.Information;
+import com.ahnaser.souqapi.AccessToken;
+import com.ahnaser.souqapi.SouqAPIConnection;
+import com.android.volley.VolleyError;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -39,6 +49,8 @@ public class NavigationDrawerFragment extends Fragment //implements Adapter.Clic
     private boolean mFromSavedInstanceState;
     private View containerView;
     private Adapter adapter;
+    private TextView textView;
+    private SharedPreferences sharedPreferences;
 
 
     public NavigationDrawerFragment() {
@@ -48,7 +60,7 @@ public class NavigationDrawerFragment extends Fragment //implements Adapter.Clic
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mUserLearnedDrawer=Boolean.valueOf(readToPreference(getActivity(),KEY_USER_LEARNED_DRAWER,"false"));
+        mUserLearnedDrawer=Boolean.valueOf(readToPreference(getActivity(), KEY_USER_LEARNED_DRAWER, "false"));
 
         if(savedInstanceState!=null){
             mFromSavedInstanceState=true;
@@ -60,6 +72,7 @@ public class NavigationDrawerFragment extends Fragment //implements Adapter.Clic
                              Bundle savedInstanceState) {
         View layout= inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
         recyclerView= (RecyclerView) layout.findViewById(R.id.drawerList);
+        textView=(TextView) layout.findViewById(R.id.logged);
         adapter=new Adapter(getActivity(),getData());
         //adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
@@ -99,6 +112,36 @@ public class NavigationDrawerFragment extends Fragment //implements Adapter.Clic
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
+
+                sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getActivity());
+                String customerId=sharedPreferences.getString("customer_id","");
+                String value=sharedPreferences.getString("value","");
+                if(!customerId.equalsIgnoreCase("") && !value.equalsIgnoreCase("")) {
+                    AccessToken accessToken=new AccessToken(value,customerId);
+                    SouqAPIConnection connection=new SouqAPIConnection("38607576","EB008DQ5bnzmSZty8fyp",getActivity());
+                    connection.setAccessToken(accessToken);
+                    Map<String,String> params = new HashMap<>();
+                    params.put("customer_id",connection.getAccessToken().getCustomerId());
+                    connection.setResponseObserver(new SouqAPIConnection.ResponseObserver() {
+                        @Override
+                        public void onError(VolleyError error) {
+                            textView.setText("You're Not Logged");
+                        }
+
+                        @Override
+                        public void onSuccess(JSONObject response) {
+                            try {
+                                textView.setText("Welcome "+response.getJSONObject("data").getString("firstname"));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+
+                    connection.get("customers/"+connection.getAccessToken().getCustomerId()+"/profile",params);
+
+                }
+
                 if(!mFromSavedInstanceState){
                     mUserLearnedDrawer=true;
                     saveToPreference(getActivity(),KEY_USER_LEARNED_DRAWER,mUserLearnedDrawer+"");

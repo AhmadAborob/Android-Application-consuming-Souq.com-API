@@ -12,12 +12,16 @@
         android:layout_height="wrap_content"
         android:background="#EF5350">
 
-        <ImageView
-            android:layout_width="280dp"
-            android:layout_height="140dp"
-            android:layout_marginBottom="16dp"
-            android:layout_marginTop="@dimen/drawer_margin_top"
-            android:src="@drawable/ic_blabla" />
+        <TextView
+            android:id="@+id/logged"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="25dp"
+            android:text="You're Not Logged"
+            android:textSize="32dp"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"/>
 
 
     </LinearLayout>

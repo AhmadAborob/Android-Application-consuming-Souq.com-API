@@ -59,6 +59,7 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
     private static final String TAG_SORT_PRICE= "sortPrice";
     private MyPagerAdapter adapter;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

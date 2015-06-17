@@ -1,9 +1,11 @@
 package com.ahnaser.myfirstapp.activities;
 
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -126,7 +128,12 @@ public class OauthExample extends ActionBarActivity {
                                             connection.setAccessToken(access_Token);
 
                                             L.t(getApplicationContext(), "VALUE: " + connection.getAccessToken().getValue());
-                                            L.t(getApplicationContext(),"CUSTOMER ID: "+ connection.getAccessToken().getCustomerId());
+                                            L.t(getApplicationContext(), "CUSTOMER ID: " + connection.getAccessToken().getCustomerId());
+                                            SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                                            SharedPreferences.Editor editor=sharedPreferences.edit();
+                                            editor.putString("customer_id",connection.getAccessToken().getCustomerId());
+                                            editor.putString("value",connection.getAccessToken().getValue());
+                                            editor.apply();
 
                                             OauthExample.this.finish();
 

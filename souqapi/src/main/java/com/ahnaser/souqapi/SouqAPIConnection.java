@@ -67,16 +67,15 @@ public class SouqAPIConnection {
 
     private void apiCall(int method, String uri, final Map<String,String> params){
 
-        JSONObject parameters=new JSONObject(params);
-
         String paramsStr;
+
         if (uri==accessTokenUrl) {
             paramsStr = generateUrl(uri, null);
         }
         else {
             paramsStr = generateUrl(uri, params);
         }
-        JsonObjectRequest request=new JsonObjectRequest(method, paramsStr,parameters, new Response.Listener<JSONObject>() {
+        JsonObjectRequest request=new JsonObjectRequest(method, paramsStr, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 apiResult=new SouqAPIResult(status,response);
@@ -87,7 +86,6 @@ public class SouqAPIConnection {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.v("ERROR: ", error.toString());
-                apiResult=new SouqAPIResult(error.networkResponse.statusCode,new JSONObject());
                 mObserver.onError(error);
             }
         }){
