@@ -13,11 +13,21 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.ahnaser.myfirstapp.R;
+import com.ahnaser.myfirstapp.extras.L;
 import com.ahnaser.souqapi.AccessToken;
 import com.ahnaser.souqapi.SouqAPIConnection;
 import com.ahnaser.souqapi.SouqAPIResult;
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -58,6 +68,7 @@ public class OauthExample extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_oauth_example);
+        requestQueue= Volley.newRequestQueue(this);
         test();
 
 
@@ -71,6 +82,7 @@ public class OauthExample extends ActionBarActivity {
         pd = ProgressDialog.show(this, "", "Loading..",true);
 
         webView.setWebViewClient(new WebViewClient() {
+
             @Override
             public void onPageFinished(WebView view, String url) {
                 //This method will be executed each time a page finished loading.
@@ -81,7 +93,7 @@ public class OauthExample extends ActionBarActivity {
             }
 
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            public boolean shouldOverrideUrlLoading(final WebView view, String url) {
                 if (url.startsWith("https://api.souq.com/oauth/authorize/")) {
                     Log.i("Authorize", "");
                     Uri uri = Uri.parse(url);
@@ -94,7 +106,63 @@ public class OauthExample extends ActionBarActivity {
                     Log.i("Authorize", "Auth token received: " + authorizationToken);
 
                     //connection.setAccessTokenFromServer(authorizationToken, "https://api.souq.com/oauth/authorize/", scopes);
-                    new OauthAsync().execute();
+                    //new OauthAsync().execute();
+
+                    stringRequest = new StringRequest(Request.Method.POST, generateUrl(accessTokenUrl, null),
+                            new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    Log.v("STATUS CODE: ", Integer.toString(status));
+
+                                    try {
+                                        JSONObject result = new JSONObject(response);
+                                        apiResult = new SouqAPIResult(status, result);
+                                        try {
+                                            AccessToken access_Token;
+                                            String value, customerId;
+                                            value = apiResult.getData().getString("access_token");
+                                            customerId = apiResult.getData().getString("customer_id");
+                                            access_Token = new AccessToken(value, customerId, scopes);
+                                            connection.setAccessToken(access_Token);
+
+                                            L.t(getApplicationContext(), "VALUE: " + connection.getAccessToken().getValue());
+                                            L.t(getApplicationContext(),"CUSTOMER ID: "+ connection.getAccessToken().getCustomerId());
+
+                                            view.destroy();
+
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.v("STATUS CODE: ", Integer.toString(error.networkResponse.statusCode));
+
+                        }
+                    }) {
+                        @Override
+                        protected Map<String, String> getParams() throws AuthFailureError {
+                            Map<String, String> params = new HashMap<String, String>();
+                            params.put("code", authorizationToken);
+                            params.put(KEY_CLIENT_ID, connection.getClientId());
+                            params.put(KEY_CLIENT_SECRET, connection.getClientSecret());
+                            params.put("grant_type", "authorization_code");
+                            return params;
+                        }
+
+                        @Override
+                        protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                            status = response.statusCode;
+                            return super.parseNetworkResponse(response);
+                        }
+                    };
+
+                    requestQueue.add(stringRequest);
 
                 } else {
                     Log.i("Authorize", "Redirecting to: " + url);
