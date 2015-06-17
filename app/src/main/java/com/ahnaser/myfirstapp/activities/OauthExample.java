@@ -128,7 +128,7 @@ public class OauthExample extends ActionBarActivity {
                                             L.t(getApplicationContext(), "VALUE: " + connection.getAccessToken().getValue());
                                             L.t(getApplicationContext(),"CUSTOMER ID: "+ connection.getAccessToken().getCustomerId());
 
-                                            view.destroy();
+                                            OauthExample.this.finish();
 
                                         } catch (JSONException e) {
                                             e.printStackTrace();
