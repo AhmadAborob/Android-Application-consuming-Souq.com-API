@@ -1,8 +1,5 @@
 package com.ahnaser.souqapi;
 
-/**
- * Created by root on 09/06/15.
- */
 public class AccessToken {
     private String value;
     private String customerId;
@@ -13,7 +10,7 @@ public class AccessToken {
     public AccessToken(String value, String customerId) {
         this.value = value;
         this.customerId = customerId;
-        this.authorizedScopes="";
+        this.authorizedScopes = "";
     }
 
     public AccessToken(String value, String customerId, String authorizedScopes) {
@@ -39,8 +36,8 @@ public class AccessToken {
     }
 
     public String getType() {
-        if(type.isEmpty()){
-            type="Bearer";
+        if (type.isEmpty()) {
+            type = "Bearer";
         }
         return type;
     }

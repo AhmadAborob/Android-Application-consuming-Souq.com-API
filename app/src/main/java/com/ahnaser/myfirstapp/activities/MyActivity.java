@@ -126,8 +126,7 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
             }
 
             @Override
-            public void onSuccess(JSONObject response) {
-
+            public void onSuccess(JSONObject response, int statusCode) {
                 JSONObject data=new JSONObject();
                 try {
                     JSONArray arr=response.getJSONArray("data");

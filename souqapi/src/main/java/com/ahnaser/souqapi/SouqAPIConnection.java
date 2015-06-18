@@ -25,18 +25,18 @@ public class SouqAPIConnection {
     private static final String KEY_ACCESS_TOKEN = "access_token";
     private static final String KEY_APP_ID = "app_id";
     private static final String KEY_APP_SECRET = "app_secret";
-    private static final String KEY_CLIENT_ID="client_id";
-    private static final String KEY_CLIENT_SECRET="client_secret";
+    private static final String KEY_CLIENT_ID = "client_id";
+    private static final String KEY_CLIENT_SECRET = "client_secret";
     private static final String KEY_LANGUAGE = "language";
     private static final String KEY_COUNTRY = "country";
     private static final String KEY_CUSTOMER_ID = "customer_id";
 
-    private String apiBaseUrl="https://api.souq.com";
-    private String apiUrl="https://api.souq.com/v1/";
-    private String authorizeUrl="/oauth/authorize";
-    private String accessTokenUrl="/oauth/access_token";
-    private String defaultCountry="ae";
-    private String defaultLanguage="ar";
+    private String apiBaseUrl = "https://api.souq.com";
+    private String apiUrl = "https://api.souq.com/v1/";
+    private String authorizeUrl = "/oauth/authorize";
+    private String accessTokenUrl = "/oauth/access_token";
+    private String defaultCountry = "ae";
+    private String defaultLanguage = "ar";
     private String clientId;
     private String clientSecret;
     private AccessToken accessToken;
@@ -45,11 +45,10 @@ public class SouqAPIConnection {
     private int status;
     private Context context;
 
-
-    public interface ResponseObserver
-    {
+    public interface ResponseObserver {
         void onError(VolleyError error);
-        void onSuccess(JSONObject response);
+
+        void onSuccess(JSONObject response, int statusCode);
     }
 
     private ResponseObserver mObserver;
@@ -58,42 +57,35 @@ public class SouqAPIConnection {
         mObserver = observer;
     }
 
-    public SouqAPIConnection(String clientId,String clientSecret, Context context){
-        requestQueue=Volley.newRequestQueue(context);
-        this.clientId=clientId;
-        this.clientSecret=clientSecret;
-        this.context=context;
+    public SouqAPIConnection(String clientId, String clientSecret, Context context) {
+        requestQueue = Volley.newRequestQueue(context);
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        this.context = context;
     }
 
-    private void apiCall(int method, String uri, final Map<String,String> params){
+    private void apiCall(int method, String uri, final Map<String, String> params) {
 
-        String paramsStr;
+        String paramsStr = generateUrl(uri, params);
 
-        if (uri==accessTokenUrl) {
-            paramsStr = generateUrl(uri, null);
-        }
-        else {
-            paramsStr = generateUrl(uri, params);
-        }
-        JsonObjectRequest request=new JsonObjectRequest(method, paramsStr, new Response.Listener<JSONObject>() {
+        JsonObjectRequest request = new JsonObjectRequest(method, paramsStr, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                apiResult=new SouqAPIResult(status,response);
-                mObserver.onSuccess(response);
+                apiResult = new SouqAPIResult(status, response);
+                mObserver.onSuccess(response,status);
 
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.v("ERROR: ", error.toString());
                 mObserver.onError(error);
             }
-        }){
+        }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                if(accessToken!=null){
-                    params.put(KEY_ACCESS_TOKEN,accessToken.getValue());
-                    params.put(KEY_CUSTOMER_ID,accessToken.getCustomerId());
+                if (accessToken != null) {
+                    params.put(KEY_ACCESS_TOKEN, accessToken.getValue());
+                    params.put(KEY_CUSTOMER_ID, accessToken.getCustomerId());
                     return params;
                 }
                 return super.getParams();
@@ -101,8 +93,8 @@ public class SouqAPIConnection {
 
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                if(accessToken!=null) {
-                    Map<String, String> headers = new HashMap<String,String>();
+                if (accessToken != null) {
+                    Map<String, String> headers = new HashMap<String, String>();
                     String auth = "Bearer " + accessToken.getValue();
                     headers.put("Authorization", auth);
                     return headers;
@@ -112,7 +104,7 @@ public class SouqAPIConnection {
 
             @Override
             protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
-                status=response.statusCode;
+                status = response.statusCode;
                 return super.parseNetworkResponse(response);
             }
         };
@@ -120,11 +112,11 @@ public class SouqAPIConnection {
         requestQueue.add(request);
     }
 
-    private String generateUrl(String uri,Map<String,String> paramss){
-        Map<String,String> params=new HashMap<String, String>();
+    private String generateUrl(String uri, Map<String, String> paramss) {
+        Map<String, String> params = new HashMap<String, String>();
         StringBuilder url = new StringBuilder();
 
-        if (uri!=accessTokenUrl) {
+        if (uri != accessTokenUrl) {
 
             params.put(KEY_APP_ID, clientId);
             params.put(KEY_APP_SECRET, clientSecret);
@@ -149,8 +141,7 @@ public class SouqAPIConnection {
                     url.append('&');
                 }
             }
-        }
-        else {
+        } else {
 
             //params.put(KEY_CLIENT_ID, clientId);
             //params.put(KEY_CLIENT_SECRET, clientSecret);
@@ -174,44 +165,43 @@ public class SouqAPIConnection {
                 }
             }
         }
-        if (uri==accessTokenUrl) {
+        if (uri == accessTokenUrl) {
             Log.v("ACCESS TOKEN: ", apiBaseUrl + uri + url.toString());
             return apiBaseUrl + uri + url.toString();
-        }
-        else{
-            return apiUrl+uri+url.toString();
+        } else {
+            return apiUrl + uri + url.toString();
         }
     }
 
-    public void get(String uri){
+    public void get(String uri) {
         apiCall(Request.Method.GET, uri, null);
     }
 
-    public void post(String uri){
+    public void post(String uri) {
         apiCall(Request.Method.POST, uri, null);
     }
 
-    public void put(String uri){
-        apiCall(Request.Method.PUT,uri,null);
+    public void put(String uri) {
+        apiCall(Request.Method.PUT, uri, null);
     }
 
-    public void delete(String uri){
+    public void delete(String uri) {
         apiCall(Request.Method.DELETE, uri, null);
     }
 
-    public void get(String uri, Map<String,String> params){
+    public void get(String uri, Map<String, String> params) {
         apiCall(Request.Method.GET, uri, params);
     }
 
-    public void post(String uri, Map<String,String> params){
+    public void post(String uri, Map<String, String> params) {
         apiCall(Request.Method.POST, uri, params);
     }
 
-    public void put(String uri, Map<String,String> params){
+    public void put(String uri, Map<String, String> params) {
         apiCall(Request.Method.PUT, uri, params);
     }
 
-    public void delete(String uri, Map<String,String> params){
+    public void delete(String uri, Map<String, String> params) {
         apiCall(Request.Method.DELETE, uri, params);
     }
 
@@ -295,68 +285,71 @@ public class SouqAPIConnection {
         this.accessTokenUrl = accessTokenUrl;
     }
 
-    public String getAuthenticationUrl(String redirectUrl, String scopes){
-        Map<String,String> params=new HashMap<String,String>();
-        params.put("redirect_uri",redirectUrl);
-        params.put("client_id",clientId);
-        params.put("response_type","code");
-        params.put("scope",scopes);
-        params.put("redirect_uri",redirectUrl);
-
-        return apiBaseUrl+authorizeUrl+"?"+HttpBuildQuery(params);
+    public SouqAPIResult getApiResult() {
+        return apiResult;
     }
 
-    public String getAuthenticationUrl(String redirectUrl, String scopes, String state){
-        Map<String,String> params=new HashMap<String,String>();
-        params.put("redirect_uri",redirectUrl);
-        params.put("client_id",clientId);
-        params.put("response_type","code");
-        params.put("scope",scopes);
-        params.put("state",state);
-
-        return apiBaseUrl+authorizeUrl+"?"+HttpBuildQuery(params);
+    public void setApiResult(SouqAPIResult apiResult) {
+        this.apiResult = apiResult;
     }
 
-private String HttpBuildQuery(Map<String,String> params) {
-    Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
-    StringBuilder url = new StringBuilder();
-    while (iterator.hasNext()) {
-        Map.Entry<String, String> param = iterator.next();
-        url.append(param.getKey()).append('=')
-                .append(param.getValue());
-        if (iterator.hasNext()) {
-            url.append('&');
+    public String getAuthenticationUrl(String redirectUrl, String scopes) {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("redirect_uri", redirectUrl);
+        params.put("client_id", clientId);
+        params.put("response_type", "code");
+        params.put("scope", scopes);
+        params.put("redirect_uri", redirectUrl);
+
+        return apiBaseUrl + authorizeUrl + "?" + HttpBuildQuery(params);
+    }
+
+    public String getAuthenticationUrl(String redirectUrl, String scopes, String state) {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("redirect_uri", redirectUrl);
+        params.put("client_id", clientId);
+        params.put("response_type", "code");
+        params.put("scope", scopes);
+        params.put("state", state);
+
+        return apiBaseUrl + authorizeUrl + "?" + HttpBuildQuery(params);
+    }
+
+    private String HttpBuildQuery(Map<String, String> params) {
+        Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
+        StringBuilder url = new StringBuilder();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> param = iterator.next();
+            url.append(param.getKey()).append('=')
+                    .append(param.getValue());
+            if (iterator.hasNext()) {
+                url.append('&');
+            }
         }
+        return url.toString();
     }
-   return url.toString();
-}
 
-    public void setAccessTokenFromServer(final String code, final String redirectUrl, final String scopes){
+    public void setAccessTokenFromServer(final String code, final String redirectUrl, final String scopes) {
 
-        StringRequest stringRequest=new StringRequest(Request.Method.POST,generateUrl(accessTokenUrl,null),
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, generateUrl(accessTokenUrl, null),
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         Log.v("STATUS CODE: ", Integer.toString(status));
-
                         try {
-                            JSONObject result=new JSONObject(response);
-                            apiResult=new SouqAPIResult(status,result);
+                            JSONObject result = new JSONObject(response);
+                            apiResult = new SouqAPIResult(status, result);
                             try {
                                 AccessToken access_Token;
-                                String value,customerId;
-                                value=apiResult.getData().getString("access_token");
-                                customerId=apiResult.getData().getString("customer_id");
-                                access_Token=new AccessToken(value,customerId,scopes);
+                                String value, customerId;
+                                value = apiResult.getData().getString("access_token");
+                                customerId = apiResult.getData().getString("customer_id");
+                                access_Token = new AccessToken(value, customerId, scopes);
                                 setAccessToken(access_Token);
-
-                                //Log.v("VALUE: ", accessToken.getValue());
-                                //Log.v("CUSTOMER ID: ", accessToken.getCustomerId());
-
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-
+                            mObserver.onSuccess(result,status);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -365,12 +358,12 @@ private String HttpBuildQuery(Map<String,String> params) {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.v("STATUS CODE: ", Integer.toString(error.networkResponse.statusCode));
-
+                mObserver.onError(error);
             }
-        }){
+        }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params=new HashMap<String,String>();
+                Map<String, String> params = new HashMap<String, String>();
                 params.put("code", code);
                 params.put(KEY_CLIENT_ID, clientId);
                 params.put(KEY_CLIENT_SECRET, clientSecret);
@@ -381,37 +374,11 @@ private String HttpBuildQuery(Map<String,String> params) {
 
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                status=response.statusCode;
+                status = response.statusCode;
                 return super.parseNetworkResponse(response);
             }
         };
 
         requestQueue.add(stringRequest);
-
-        /*
-        this.setResponseObserver(new ResponseObserver() {
-            @Override
-            public void onError(VolleyError error) {
-                Log.v("STATUS CODE: ", Integer.toString(apiResult.getStatus()));
-            }
-
-            @Override
-            public void onSuccess(JSONObject response) {
-                AccessToken accessToken;
-                String value,customerId;
-                try {
-                    value=apiResult.getData().getString("access_token");
-                    customerId=apiResult.getData().getString("customer_id");
-                    Log.v("CUSTOMER ID: ", customerId);
-                    accessToken=new AccessToken(value,customerId,scopes);
-                    setAccessToken(accessToken);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        this.post(this.accessTokenUrl, params);
-        */
     }
 }
