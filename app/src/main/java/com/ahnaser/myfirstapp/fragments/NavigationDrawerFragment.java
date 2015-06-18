@@ -129,7 +129,7 @@ public class NavigationDrawerFragment extends Fragment //implements Adapter.Clic
                         }
 
                         @Override
-                        public void onSuccess(JSONObject response) {
+                        public void onSuccess(JSONObject response, int statusCode) {
                             try {
                                 textView.setText("Welcome "+response.getJSONObject("data").getString("firstname"));
                             } catch (JSONException e) {
