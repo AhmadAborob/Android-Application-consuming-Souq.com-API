@@ -1,5 +1,12 @@
 package com.ahnaser.souqapi;
 
+/**
+ * @copyright  Copyright (c) 2015 Souq.com. All rights reserved.
+ * @author     Ahmad Naser (aaborob@souq.com), created on 1/06/15
+ * @package    SouqAPI
+ * @version    1.0
+ */
+
 public class AccessToken {
     private String value;
     private String customerId;
