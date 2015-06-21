@@ -3,7 +3,6 @@ package com.ahnaser.myfirstapp.activities;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
@@ -232,79 +231,5 @@ public class OauthExample extends ActionBarActivity {
 
             Log.v("ACCESS TOKEN: ", apiBaseUrl + uri + url.toString());
             return apiBaseUrl + uri + url.toString();
-    }
-
-    private class OauthAsync extends AsyncTask<String,Void,Boolean>{
-
-        @Override
-        protected void onPreExecute() {
-            connection.setAccessTokenFromServer(authorizationToken, "https://api.souq.com/oauth/authorize/", scopes);
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-
-            /*stringRequest = new StringRequest(Request.Method.POST, generateUrl(accessTokenUrl, null),
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            Log.v("STATUS CODE: ", Integer.toString(status));
-
-                            try {
-                                JSONObject result = new JSONObject(response);
-                                apiResult = new SouqAPIResult(status, result);
-                                try {
-                                    AccessToken access_Token;
-                                    String value, customerId;
-                                    value = apiResult.getData().getString("access_token");
-                                    customerId = apiResult.getData().getString("customer_id");
-                                    access_Token = new AccessToken(value, customerId, scopes);
-                                    connection.setAccessToken(access_Token);
-
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.v("STATUS CODE: ", Integer.toString(error.networkResponse.statusCode));
-
-                }
-            }) {
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> params = new HashMap<String, String>();
-                    params.put("code", authorizationToken);
-                    params.put(KEY_CLIENT_ID, connection.getClientId());
-                    params.put(KEY_CLIENT_SECRET, connection.getClientSecret());
-                    params.put("grant_type", "authorization_code");
-                    return params;
-                }
-
-                @Override
-                protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                    status = response.statusCode;
-                    return super.parseNetworkResponse(response);
-                }
-            };*/
-
-
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean aBoolean) {
-            if(aBoolean){
-               // Log.v("VALUE: ", connection.getAccessToken().getValue());
-               // Log.v("CUSTOMER ID: ", connection.getAccessToken().getCustomerId());
-            }
-            super.onPostExecute(aBoolean);
-        }
     }
 }
