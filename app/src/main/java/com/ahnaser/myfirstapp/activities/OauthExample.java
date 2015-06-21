@@ -18,16 +18,11 @@ import com.ahnaser.myfirstapp.extras.L;
 import com.ahnaser.souqapi.AccessToken;
 import com.ahnaser.souqapi.SouqAPIConnection;
 import com.ahnaser.souqapi.SouqAPIResult;
-import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -64,11 +59,18 @@ public class OauthExample extends ActionBarActivity {
     private String defaultLanguage="ar";
     private String scopes="customer_profile,cart_management,customer_demographics,customer_profile,cart_management,customer_demographics";
 
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_oauth_example);
+
+        sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        editor=sharedPreferences.edit();
+
         requestQueue= Volley.newRequestQueue(this);
         test();
 
@@ -106,10 +108,26 @@ public class OauthExample extends ActionBarActivity {
                     }
                     Log.i("Authorize", "Auth token received: " + authorizationToken);
 
-                    //connection.setAccessTokenFromServer(authorizationToken, "https://api.souq.com/oauth/authorize/", scopes);
-                    //new OauthAsync().execute();
+                    connection.setResponseObserver(new SouqAPIConnection.ResponseObserver() {
+                        @Override
+                        public void onError(VolleyError error) {
+                            Log.v("STATUS CODE: ",Integer.toString(error.networkResponse.statusCode));
+                        }
 
-                    stringRequest = new StringRequest(Request.Method.POST, generateUrl(accessTokenUrl, null),
+                        @Override
+                        public void onSuccess(JSONObject response, int statusCode) {
+                            L.t(getApplicationContext(), "VALUE: " + connection.getAccessToken().getValue());
+                            L.t(getApplicationContext(), "CUSTOMER ID: " + connection.getAccessToken().getCustomerId());
+                            editor.putString("customer_id",connection.getAccessToken().getCustomerId());
+                            editor.putString("value", connection.getAccessToken().getValue());
+                            editor.apply();
+                            OauthExample.this.finish();
+                        }
+                    });
+
+                    connection.setAccessTokenFromServer(authorizationToken, "https://api.souq.com/oauth/authorize/", scopes);
+
+                    /*stringRequest = new StringRequest(Request.Method.POST, generateUrl(accessTokenUrl, null),
                             new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String response) {
@@ -168,7 +186,7 @@ public class OauthExample extends ActionBarActivity {
                         }
                     };
 
-                    requestQueue.add(stringRequest);
+                    requestQueue.add(stringRequest);*/
 
                 } else {
                     Log.i("Authorize", "Redirecting to: " + url);
