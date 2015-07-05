@@ -14,6 +14,9 @@ public class Product {
     private static final String KEY_PRODUCT_TYPE_ID = "product_type_id";
     private static final String KEY_LINK = "link";
     private static final String KEY_IMAGES = "images";
+    private static final String KEY_SMALL = "S";
+    private static final String KEY_LARGE="L";
+    private static final String KEY_MEDIUM ="M";
     private static final String KEY_CURRENCY = "currency";
     private static final String KEY_MSRP = "msrp";
     private static final String KEY_OFFER_PRICE = "offer_price";
@@ -23,6 +26,7 @@ public class Product {
     private static final String KEY_VIDEO = "video";
     private static final String KEY_ATTRIBUTES = "attributes";
     private static final String KEY_ATTRIBUTES_GROUPS = "attributes_groups";
+    private static final String KEY_DESCRIPTION_VALUE="value";
     private static final String KEY_VARIATIONS = "variations";
 
     private String id;
@@ -31,11 +35,15 @@ public class Product {
     private String product_type_id;
     private String link;
     private JSONObject images;
+    private String image_large_link;
+    private String image_medium_link;
+    private String image_small_link;
     private String currency;
     private String msrp;
     private String offer_price;
     private String offer_id;
     private String rating_count;
+    private String description;
     private JSONArray ean;
     private JSONArray video;
     private JSONArray attributes;
@@ -65,6 +73,17 @@ public class Product {
             }
             if (data.has(KEY_IMAGES) && !data.isNull(KEY_IMAGES)) {
                 images = data.getJSONObject(KEY_IMAGES);
+                if (images.has(KEY_LARGE) && !images.isNull(KEY_LARGE)) {
+                        image_large_link = images.getJSONArray(KEY_LARGE).getString(0);
+                    }
+                    else if (images.has(KEY_MEDIUM) && !images.isNull(KEY_MEDIUM)) {
+                        image_medium_link = images.getJSONArray(KEY_MEDIUM).getString(0);
+                    }
+                    else if (images.has(KEY_SMALL) && !images.isNull(KEY_SMALL)) {
+                        image_small_link = images.getJSONArray(KEY_SMALL).getString(0);
+                    }
+
+
             }
             if (data.has(KEY_CURRENCY) && !data.isNull(KEY_CURRENCY)) {
                 currency = data.getString(KEY_CURRENCY);
@@ -92,6 +111,13 @@ public class Product {
             }
             if (data.has(KEY_ATTRIBUTES_GROUPS) && !data.isNull(KEY_ATTRIBUTES_GROUPS)) {
                 attributes_groups = data.getJSONArray(KEY_ATTRIBUTES_GROUPS);
+
+                if (attributes_groups.getJSONObject(0).has(KEY_ATTRIBUTES) && !attributes_groups.getJSONObject(0).isNull(KEY_ATTRIBUTES)) {
+                    JSONArray attrs = attributes_groups.getJSONObject(0).getJSONArray(KEY_ATTRIBUTES);
+                    if (attrs.getJSONObject(1).has(KEY_DESCRIPTION_VALUE) && !attrs.getJSONObject(1).isNull(KEY_DESCRIPTION_VALUE)) {
+                        description = attrs.getJSONObject(1).getString(KEY_DESCRIPTION_VALUE);
+                    }
+                }
             }
             if (data.has(KEY_VARIATIONS) && !data.isNull(KEY_VARIATIONS)) {
                 variations = data.getJSONArray(KEY_VARIATIONS);
@@ -231,6 +257,38 @@ public class Product {
 
     public void setVariations(JSONArray variations) {
         this.variations = variations;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getImage_large_link() {
+        return image_large_link;
+    }
+
+    public void setImage_large_link(String image_large_link) {
+        this.image_large_link = image_large_link;
+    }
+
+    public String getImage_medium_link() {
+        return image_medium_link;
+    }
+
+    public void setImage_medium_link(String image_medium_link) {
+        this.image_medium_link = image_medium_link;
+    }
+
+    public String getImage_small_link() {
+        return image_small_link;
+    }
+
+    public void setImage_small_link(String image_small_link) {
+        this.image_small_link = image_small_link;
     }
 
 }

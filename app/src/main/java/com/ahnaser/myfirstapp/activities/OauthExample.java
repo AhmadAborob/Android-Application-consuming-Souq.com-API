@@ -127,67 +127,6 @@ public class OauthExample extends ActionBarActivity {
 
                     connection.setAccessTokenFromServer(authorizationToken, "https://api.souq.com/oauth/authorize/", scopes);
 
-                    /*stringRequest = new StringRequest(Request.Method.POST, generateUrl(accessTokenUrl, null),
-                            new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    Log.v("STATUS CODE: ", Integer.toString(status));
-
-                                    try {
-                                        JSONObject result = new JSONObject(response);
-                                        apiResult = new SouqAPIResult(status, result);
-                                        try {
-                                            AccessToken access_Token;
-                                            String value, customerId;
-                                            value = apiResult.getData().getString("access_token");
-                                            customerId = apiResult.getData().getString("customer_id");
-                                            access_Token = new AccessToken(value, customerId, scopes);
-                                            connection.setAccessToken(access_Token);
-
-                                            L.t(getApplicationContext(), "VALUE: " + connection.getAccessToken().getValue());
-                                            L.t(getApplicationContext(), "CUSTOMER ID: " + connection.getAccessToken().getCustomerId());
-                                            SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                                            SharedPreferences.Editor editor=sharedPreferences.edit();
-                                            editor.putString("customer_id",connection.getAccessToken().getCustomerId());
-                                            editor.putString("value",connection.getAccessToken().getValue());
-                                            editor.apply();
-
-                                            OauthExample.this.finish();
-
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.v("STATUS CODE: ", Integer.toString(error.networkResponse.statusCode));
-
-                        }
-                    }) {
-                        @Override
-                        protected Map<String, String> getParams() throws AuthFailureError {
-                            Map<String, String> params = new HashMap<String, String>();
-                            params.put("code", authorizationToken);
-                            params.put(KEY_CLIENT_ID, connection.getClientId());
-                            params.put(KEY_CLIENT_SECRET, connection.getClientSecret());
-                            params.put("grant_type", "authorization_code");
-                            return params;
-                        }
-
-                        @Override
-                        protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                            status = response.statusCode;
-                            return super.parseNetworkResponse(response);
-                        }
-                    };
-
-                    requestQueue.add(stringRequest);*/
-
                 } else {
                     Log.i("Authorize", "Redirecting to: " + url);
                     webView.loadUrl(url);

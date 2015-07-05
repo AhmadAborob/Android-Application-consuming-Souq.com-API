@@ -14,41 +14,40 @@ import android.widget.TextView;
 
 import com.ahnaser.myfirstapp.MyApplication;
 import com.ahnaser.myfirstapp.R;
-import com.ahnaser.myfirstapp.extras.Constants;
-import com.ahnaser.myfirstapp.extras.Keys;
 import com.ahnaser.myfirstapp.network.VolleySingleton;
-import com.ahnaser.myfirstapp.pojo.Product;
+import com.ahnaser.souqapi.SouqAPIConnection;
+import com.ahnaser.souqapi.SouqAPIResult;
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkError;
 import com.android.volley.NoConnectionError;
 import com.android.volley.ParseError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.JsonObjectRequest;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class SubActivity extends ActionBarActivity {
     private Toolbar toolbar;
     private VolleySingleton volleySingleton;
-    private RequestQueue requestQueue;
+    //private RequestQueue requestQueue;
     private ImageLoader imageLoader;
     private TextView textVolleyError;
     private ImageView productImage;
     private TextView productLabel,marketPrice,offerPrice;
     private WebView description;
     private String productID;
-    private static String API_SOUQ_PRODUCTS1="https://api.souq.com/v1/products/";
-    private static String API_SOUQ_PRODUCTS2="?country=ae&language=en&show_offers=0&show_attributes=1&show_variations=1&format=json";
-    public Product product;
+    //private static String API_SOUQ_PRODUCTS1="https://api.souq.com/v1/products/";
+    //private static String API_SOUQ_PRODUCTS2="?country=ae&language=en&show_offers=0&show_attributes=1&show_variations=1&format=json";
+    public com.ahnaser.souqapi.pojos.Product product;
+
+    SouqAPIConnection souqAPIConnection;
 
 
     @Override
@@ -58,7 +57,7 @@ public class SubActivity extends ActionBarActivity {
         toolbar=(Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
         volleySingleton=VolleySingleton.getInstance();
-        requestQueue=volleySingleton.getRequestQueue();
+        //requestQueue=volleySingleton.getRequestQueue();
         imageLoader=volleySingleton.getImageLoader();
         textVolleyError=(TextView) findViewById(R.id.textVolleyError);
         productImage=(ImageView) findViewById(R.id.productImage);
@@ -73,13 +72,56 @@ public class SubActivity extends ActionBarActivity {
         Bundle extras = getIntent().getExtras();
         productID = extras.getString("productID");
 
+        souqAPIConnection=new SouqAPIConnection(MyApplication.CLIENT_ID,MyApplication.API_KEY_SOUQ,this);
+
         sendJSONRequest();
 
     }
 
     private void sendJSONRequest(){
 
-        JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, getRequestUrl(),(String) null, new Response.Listener<JSONObject>() {
+        Map<String,String> params=new HashMap<>();
+        params.put("show_attributes","1");
+        params.put("show_variations","1");
+
+        souqAPIConnection.setResponseObserver(new SouqAPIConnection.ResponseObserver() {
+            @Override
+            public void onError(VolleyError error) {
+                textVolleyError.setVisibility(View.VISIBLE);
+                if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                    textVolleyError.setText(R.string.error_timeout);
+
+                } else if (error instanceof AuthFailureError) {
+                    textVolleyError.setText(R.string.error_auth_failure);
+                    //TODO
+                } else if (error instanceof ServerError) {
+                    textVolleyError.setText(R.string.error_auth_failure);
+                    //TODO
+                } else if (error instanceof NetworkError) {
+                    textVolleyError.setText(R.string.error_network);
+                    //TODO
+                } else if (error instanceof ParseError) {
+                    textVolleyError.setText(R.string.error_parser);
+                    //TODO
+                }
+            }
+
+            @Override
+            public void onSuccess(JSONObject response, int statusCode) {
+                textVolleyError.setVisibility(View.GONE);
+                SouqAPIResult souqAPIResult=new SouqAPIResult(statusCode,response);
+                try {
+                    product=new com.ahnaser.souqapi.pojos.Product(souqAPIResult);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                setUpPage();
+            }
+        });
+
+        souqAPIConnection.get("products/"+productID, params);
+
+        /*JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, getRequestUrl(),(String) null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 textVolleyError.setVisibility(View.GONE);
@@ -109,11 +151,11 @@ public class SubActivity extends ActionBarActivity {
 
             }
         });
-        requestQueue.add(request);
+        requestQueue.add(request);*/
 
     }
 
-    private Product parseJSONRequest(JSONObject response){
+    /*private Product parseJSONRequest(JSONObject response){
 
         Product product=null;
 
@@ -184,11 +226,11 @@ public class SubActivity extends ActionBarActivity {
         }
 
         return product;
-    }
+    }*/
 
     private void setUpPage(){
-        if (!product.getImageLink().equals(Constants.NA)){
-            imageLoader.get(product.getImageLink(), new ImageLoader.ImageListener() {
+        if (product.getImage_large_link()!=null){
+            imageLoader.get(product.getImage_large_link(), new ImageLoader.ImageListener() {
                 @Override
                 public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
                     productImage.setImageBitmap(response.getBitmap());
@@ -203,7 +245,7 @@ public class SubActivity extends ActionBarActivity {
 
         productLabel.setText(product.getLabel());
         marketPrice.setText(product.getMsrp());
-        offerPrice.setText(product.getOfferPrice());
+        offerPrice.setText(product.getOffer_price());
         description.loadData(product.getDescription(),"text/html",null);
     }
 
@@ -244,7 +286,7 @@ public class SubActivity extends ActionBarActivity {
         return super.onTouchEvent(event);
     }
 
-    public String getRequestUrl(){
+    /*public String getRequestUrl(){
         return API_SOUQ_PRODUCTS1+productID+API_SOUQ_PRODUCTS2+ MyApplication.CLIENT_ID+MyApplication.API_KEY_SOUQ;
-    }
+    }*/
 }

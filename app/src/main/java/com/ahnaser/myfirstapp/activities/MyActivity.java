@@ -151,7 +151,6 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             //use the query to search your data somehow
-            //Fragment fragment=(Fragment)getSupportFragmentManager().findFragmentById(mPager.getCurrentItem());
             Fragment fragment=adapter.getRegisteredFragment(mPager.getCurrentItem());
             ((FragmentSearch) fragment).newSearch(query);
         }
@@ -223,15 +222,15 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
         public Fragment getItem(int position) {
             Fragment fragment=null;
 
-            switch (position){
+            switch (position) {
                 case PRODUCT_SEARCH_RESULTS:
-                    fragment= FragmentSearch.newInstance("", "");
+                    fragment = FragmentSearch.newInstance("", "");
                     break;
                 case 1:
-                    fragment=FragmentSearch.newInstance("","");
+                    fragment = FragmentSearch.newInstance("", "");
                     break;
                 case 2:
-                    fragment=FragmentSearch.newInstance("","");
+                    fragment = FragmentSearch.newInstance("", "");
                     break;
             }
             return fragment;

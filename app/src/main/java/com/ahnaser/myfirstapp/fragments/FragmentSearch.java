@@ -24,17 +24,15 @@ import com.ahnaser.myfirstapp.extras.ProductSorter;
 import com.ahnaser.myfirstapp.extras.SortListener;
 import com.ahnaser.myfirstapp.network.VolleySingleton;
 import com.ahnaser.myfirstapp.pojo.Product;
+import com.ahnaser.souqapi.SouqAPIConnection;
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkError;
 import com.android.volley.NoConnectionError;
 import com.android.volley.ParseError;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,6 +40,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
  /**
  * A simple {@link Fragment} subclass.
@@ -59,9 +58,9 @@ public class FragmentSearch extends Fragment implements SortListener {
     private String mParam2;
 
     private String query="iphone";
-    private static String API_SOUQ_PRODUCTS_SEARCH1="https://api.souq.com/v1/products?q=";
+    /*private static String API_SOUQ_PRODUCTS_SEARCH1="https://api.souq.com/v1/products?q=";
      private static String API_SOUQ_PRODUCTS_SEARCH2="&&page=";
-     private static String API_SOUQ_PRODUCTS_SEARCH3="&show=20&show_attributes=0&country=ae&language=en&format=json";
+     private static String API_SOUQ_PRODUCTS_SEARCH3="&show=20&show_attributes=0&country=ae&language=en&format=json";*/
      private int current=1,totalPages=1,totalItems=1;
      private VolleySingleton volleySingleton;
      private RequestQueue requestQueue;
@@ -77,6 +76,8 @@ public class FragmentSearch extends Fragment implements SortListener {
      private LinearLayoutManager mLayoutManager;
      HashMap <String,String> params;
      JSONObject paraobj;
+
+     SouqAPIConnection souqAPIConnection;
 
 
     /**
@@ -109,14 +110,54 @@ public class FragmentSearch extends Fragment implements SortListener {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        volleySingleton=VolleySingleton.getInstance();
-        requestQueue=volleySingleton.getRequestQueue();
+        //volleySingleton=VolleySingleton.getInstance();
+        //requestQueue=volleySingleton.getRequestQueue();
         mLayoutManager=new LinearLayoutManager(getActivity());
+
+        souqAPIConnection=new SouqAPIConnection(MyApplication.CLIENT_ID,MyApplication.API_KEY_SOUQ,getActivity());
     }
 
      private void sendNewJsonRequest(){
 
-        JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, getRequestUrl(),(String) null, new Response.Listener<JSONObject>() {
+         Map<String,String> params=new HashMap<String,String>();
+         params.put("q",query);
+
+         souqAPIConnection.setResponseObserver(new SouqAPIConnection.ResponseObserver() {
+             @Override
+             public void onError(VolleyError error) {
+
+                 textVolleyError.setVisibility(View.VISIBLE);
+                 if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                     textVolleyError.setText(R.string.error_timeout);
+
+                 } else if (error instanceof AuthFailureError) {
+                     textVolleyError.setText(R.string.error_auth_failure);
+                     //TODO
+                 } else if (error instanceof ServerError) {
+                     textVolleyError.setText(R.string.error_auth_failure);
+                     //TODO
+                 } else if (error instanceof NetworkError) {
+                     textVolleyError.setText(R.string.error_network);
+                     //TODO
+                 } else if (error instanceof ParseError) {
+                     textVolleyError.setText(R.string.error_parser);
+                     //TODO
+                 }
+
+             }
+
+             @Override
+             public void onSuccess(JSONObject response, int statusCode) {
+                 textVolleyError.setVisibility(View.GONE);
+                 listProducts = parseJSONRequest(response);
+                 adapterProducts.setListProducts(listProducts);
+
+             }
+         });
+         souqAPIConnection.get("products",params);
+
+
+      /*  JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, getRequestUrl(),(String) null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 textVolleyError.setVisibility(View.GONE);
@@ -147,7 +188,7 @@ public class FragmentSearch extends Fragment implements SortListener {
 
             }
         });
-        requestQueue.add(request);
+        requestQueue.add(request);*/
 
     }
 
@@ -299,9 +340,9 @@ public class FragmentSearch extends Fragment implements SortListener {
         return view;
     }
 
-    public  String getRequestUrl(){
+    /*public  String getRequestUrl(){
         return API_SOUQ_PRODUCTS_SEARCH1+query+API_SOUQ_PRODUCTS_SEARCH2+Integer.toString(current)+API_SOUQ_PRODUCTS_SEARCH3+MyApplication.CLIENT_ID+ MyApplication.API_KEY_SOUQ;
-    }
+    }*/
 
      @Override
      public void onSortByName() {
@@ -330,7 +371,42 @@ public class FragmentSearch extends Fragment implements SortListener {
      }
 
      public void onCurrentSearch(){
-         JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, getRequestUrl(),(String) null, new Response.Listener<JSONObject>() {
+
+         Map<String,String> params=new HashMap<String,String>();
+         params.put("q","iphone");
+
+         souqAPIConnection.setResponseObserver(new SouqAPIConnection.ResponseObserver() {
+             @Override
+             public void onError(VolleyError error) {
+                 textVolleyError.setVisibility(View.VISIBLE);
+                 if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                     textVolleyError.setText(R.string.error_timeout);
+
+                 } else if (error instanceof AuthFailureError) {
+                     textVolleyError.setText(R.string.error_auth_failure);
+                     //TODO
+                 } else if (error instanceof ServerError) {
+                     textVolleyError.setText(R.string.error_auth_failure);
+                     //TODO
+                 } else if (error instanceof NetworkError) {
+                     textVolleyError.setText(R.string.error_network);
+                     //TODO
+                 } else if (error instanceof ParseError) {
+                     textVolleyError.setText(R.string.error_parser);
+                     //TODO
+                 }
+             }
+
+             @Override
+             public void onSuccess(JSONObject response, int statusCode) {
+                 textVolleyError.setVisibility(View.GONE);
+                 listProducts.addAll(parseJSONRequest(response));
+                 adapterProducts.notifyDataSetChanged();
+             }
+         });
+         souqAPIConnection.get("products",params);
+
+         /*JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, getRequestUrl(),(String) null, new Response.Listener<JSONObject>() {
              @Override
              public void onResponse(JSONObject response) {
                  textVolleyError.setVisibility(View.GONE);
@@ -361,7 +437,7 @@ public class FragmentSearch extends Fragment implements SortListener {
 
              }
          });
-         requestQueue.add(request);
+         requestQueue.add(request);*/
 
      }
 

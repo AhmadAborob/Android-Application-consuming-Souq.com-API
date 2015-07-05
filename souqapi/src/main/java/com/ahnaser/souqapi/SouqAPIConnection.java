@@ -43,7 +43,7 @@ public class SouqAPIConnection {
     private String authorizeUrl = "/oauth/authorize";
     private String accessTokenUrl = "/oauth/access_token";
     private String defaultCountry = "ae";
-    private String defaultLanguage = "ar";
+    private String defaultLanguage = "en";
     private String clientId;
     private String clientSecret;
     private AccessToken accessToken;
@@ -149,9 +149,6 @@ public class SouqAPIConnection {
                 }
             }
         } else {
-
-            //params.put(KEY_CLIENT_ID, clientId);
-            //params.put(KEY_CLIENT_SECRET, clientSecret);
 
             if (paramss != null) {
                 if (!paramss.isEmpty()) {
