@@ -1,7 +1,5 @@
 package com.ahnaser.myfirstapp.extras;
 
-import com.ahnaser.myfirstapp.pojo.Product;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,21 +8,21 @@ import java.util.Comparator;
  * Created by root on 26/05/15.
  */
 public class ProductSorter {
-    public void sortProductByName(ArrayList<Product> products){
-        Collections.sort(products, new Comparator<Product>() {
+    public void sortProductByName(ArrayList<com.ahnaser.souqapi.pojos.Product> products){
+        Collections.sort(products, new Comparator<com.ahnaser.souqapi.pojos.Product>() {
             @Override
-            public int compare(Product lhs, Product rhs) {
+            public int compare(com.ahnaser.souqapi.pojos.Product lhs, com.ahnaser.souqapi.pojos.Product rhs) {
                 return lhs.getLabel().compareTo(rhs.getLabel());
             }
         });
 
     }
 
-    public void sortProductByPrice(ArrayList<Product> products){
-        Collections.sort(products, new Comparator<Product>() {
+    public void sortProductByPrice(ArrayList<com.ahnaser.souqapi.pojos.Product> products){
+        Collections.sort(products, new Comparator<com.ahnaser.souqapi.pojos.Product>() {
             @Override
-            public int compare(Product lhs, Product rhs) {
-                return lhs.getOfferPrice().compareTo(rhs.getOfferPrice());
+            public int compare(com.ahnaser.souqapi.pojos.Product lhs, com.ahnaser.souqapi.pojos.Product rhs) {
+                return lhs.getOffer_price().compareTo(rhs.getOffer_price());
             }
         });
 

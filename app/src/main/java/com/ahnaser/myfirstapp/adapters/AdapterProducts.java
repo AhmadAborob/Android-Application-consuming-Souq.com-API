@@ -8,9 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.ahnaser.myfirstapp.extras.Constants;
-import com.ahnaser.myfirstapp.pojo.Product;
 import com.ahnaser.myfirstapp.R;
+import com.ahnaser.myfirstapp.extras.Constants;
 import com.ahnaser.myfirstapp.network.VolleySingleton;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
@@ -23,7 +22,7 @@ import java.util.ArrayList;
 public class AdapterProducts extends RecyclerView.Adapter<AdapterProducts.ViewHolderProducts> {
 
     private LayoutInflater layoutInflater;
-    private ArrayList<Product> listProducts=new ArrayList<>();
+    private ArrayList<com.ahnaser.souqapi.pojos.Product> listProducts=new ArrayList<>();
     VolleySingleton volleySingleton;
     ImageLoader imageLoader;
 
@@ -34,7 +33,7 @@ public class AdapterProducts extends RecyclerView.Adapter<AdapterProducts.ViewHo
 
     }
 
-    public void setListProducts(ArrayList<Product> listProducts){
+    public void setListProducts(ArrayList<com.ahnaser.souqapi.pojos.Product> listProducts){
         this.listProducts=listProducts;
         notifyItemRangeChanged(0,listProducts.size());
 
@@ -49,10 +48,10 @@ public class AdapterProducts extends RecyclerView.Adapter<AdapterProducts.ViewHo
 
     @Override
     public void onBindViewHolder(final ViewHolderProducts holder, int position) {
-        Product currentProduct=listProducts.get(position);
+        com.ahnaser.souqapi.pojos.Product currentProduct=listProducts.get(position);
         holder.productLabel.setText(currentProduct.getLabel());
-        holder.productPrice.setText(currentProduct.getOfferPrice());
-        String imageLink=currentProduct.getImageLink();
+        holder.productPrice.setText(currentProduct.getOffer_price());
+        String imageLink=currentProduct.getImage_small_link();
         loadImages(imageLink,holder);
 
     }

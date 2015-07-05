@@ -29,21 +29,21 @@ public class Product {
     private static final String KEY_DESCRIPTION_VALUE="value";
     private static final String KEY_VARIATIONS = "variations";
 
-    private String id;
-    private String label;
-    private String product_type_label_plural;
-    private String product_type_id;
-    private String link;
+    private String id="-1";
+    private String label="NA";
+    private String product_type_label_plural="NA";
+    private String product_type_id="NA";
+    private String link="NA";
     private JSONObject images;
-    private String image_large_link;
-    private String image_medium_link;
-    private String image_small_link;
-    private String currency;
-    private String msrp;
-    private String offer_price;
-    private String offer_id;
-    private String rating_count;
-    private String description;
+    private String image_large_link="NA";
+    private String image_medium_link="NA";
+    private String image_small_link="NA";
+    private String currency="NA";
+    private String msrp="NA";
+    private String offer_price="NA";
+    private String offer_id="NA";
+    private String rating_count="NA";
+    private String description="NA";
     private JSONArray ean;
     private JSONArray video;
     private JSONArray attributes;
@@ -74,16 +74,14 @@ public class Product {
             if (data.has(KEY_IMAGES) && !data.isNull(KEY_IMAGES)) {
                 images = data.getJSONObject(KEY_IMAGES);
                 if (images.has(KEY_LARGE) && !images.isNull(KEY_LARGE)) {
-                        image_large_link = images.getJSONArray(KEY_LARGE).getString(0);
-                    }
-                    else if (images.has(KEY_MEDIUM) && !images.isNull(KEY_MEDIUM)) {
-                        image_medium_link = images.getJSONArray(KEY_MEDIUM).getString(0);
-                    }
-                    else if (images.has(KEY_SMALL) && !images.isNull(KEY_SMALL)) {
-                        image_small_link = images.getJSONArray(KEY_SMALL).getString(0);
-                    }
-
-
+                    image_large_link = images.getJSONArray(KEY_LARGE).getString(0);
+                }
+                if (images.has(KEY_MEDIUM) && !images.isNull(KEY_MEDIUM)) {
+                    image_medium_link = images.getJSONArray(KEY_MEDIUM).getString(0);
+                }
+                if (images.has(KEY_SMALL) && !images.isNull(KEY_SMALL)) {
+                    image_small_link = images.getJSONArray(KEY_SMALL).getString(0);
+                }
             }
             if (data.has(KEY_CURRENCY) && !data.isNull(KEY_CURRENCY)) {
                 currency = data.getString(KEY_CURRENCY);
@@ -91,7 +89,81 @@ public class Product {
             if (data.has(KEY_MSRP) && !data.isNull(KEY_MSRP)) {
                 msrp = data.getString(KEY_MSRP);
             }
-            if (data.has(KEY_OFFER_PRICE) && data.isNull(KEY_OFFER_PRICE)) {
+            if (data.has(KEY_OFFER_PRICE) && !data.isNull(KEY_OFFER_PRICE)) {
+                offer_price = data.getString(KEY_OFFER_PRICE);
+            }
+            if (data.has(KEY_OFFER_ID) && !data.isNull(KEY_OFFER_ID)) {
+                offer_id = data.getString(KEY_OFFER_ID);
+            }
+            if (data.has(KEY_RATING_COUNT) && !data.isNull(KEY_RATING_COUNT)) {
+                rating_count = data.getString(KEY_RATING_COUNT);
+            }
+            if (data.has(KEY_EAN) && !data.isNull(KEY_EAN)) {
+                ean = data.getJSONArray(KEY_EAN);
+            }
+            if (data.has(KEY_VIDEO) && !data.isNull(KEY_VIDEO)) {
+                video = data.getJSONArray(KEY_VIDEO);
+            }
+            if (data.has(KEY_ATTRIBUTES) && !data.isNull(KEY_ATTRIBUTES)) {
+                attributes = data.getJSONArray(KEY_ATTRIBUTES);
+            }
+            if (data.has(KEY_ATTRIBUTES_GROUPS) && !data.isNull(KEY_ATTRIBUTES_GROUPS)) {
+                attributes_groups = data.getJSONArray(KEY_ATTRIBUTES_GROUPS);
+
+                if (attributes_groups.getJSONObject(0).has(KEY_ATTRIBUTES) && !attributes_groups.getJSONObject(0).isNull(KEY_ATTRIBUTES)) {
+                    JSONArray attrs = attributes_groups.getJSONObject(0).getJSONArray(KEY_ATTRIBUTES);
+                    if (attrs.getJSONObject(1).has(KEY_DESCRIPTION_VALUE) && !attrs.getJSONObject(1).isNull(KEY_DESCRIPTION_VALUE)) {
+                        description = attrs.getJSONObject(1).getString(KEY_DESCRIPTION_VALUE);
+                    }
+                }
+            }
+            if (data.has(KEY_VARIATIONS) && !data.isNull(KEY_VARIATIONS)) {
+                variations = data.getJSONArray(KEY_VARIATIONS);
+            }
+        }
+
+    }
+
+    public Product(JSONObject productData) throws JSONException {
+
+        if (productData != null || productData.length() > 0) {
+
+            JSONObject data = productData;
+
+            if (data.has(KEY_ID) && !data.isNull(KEY_ID)) {
+                id = data.getString(KEY_ID);
+            }
+            if (data.has(KEY_LABEL) && !data.isNull(KEY_LABEL)) {
+                label = data.getString(KEY_LABEL);
+            }
+            if (data.has(KEY_PRODUCT_TYPE_LABEL_PLURAL) && !data.isNull(KEY_PRODUCT_TYPE_LABEL_PLURAL)) {
+                product_type_label_plural = data.getString(KEY_PRODUCT_TYPE_LABEL_PLURAL);
+            }
+            if (data.has(KEY_PRODUCT_TYPE_ID) && !data.isNull(KEY_PRODUCT_TYPE_ID)) {
+                product_type_id = data.getString(KEY_PRODUCT_TYPE_ID);
+            }
+            if (data.has(KEY_LINK) && !data.isNull(KEY_LINK)) {
+                link = data.getString(KEY_LINK);
+            }
+            if (data.has(KEY_IMAGES) && !data.isNull(KEY_IMAGES)) {
+                images = data.getJSONObject(KEY_IMAGES);
+                if (images.has(KEY_LARGE) && !images.isNull(KEY_LARGE)) {
+                    image_large_link = images.getJSONArray(KEY_LARGE).getString(0);
+                }
+                if (images.has(KEY_MEDIUM) && !images.isNull(KEY_MEDIUM)) {
+                    image_medium_link = images.getJSONArray(KEY_MEDIUM).getString(0);
+                }
+                if (images.has(KEY_SMALL) && !images.isNull(KEY_SMALL)) {
+                    image_small_link = images.getJSONArray(KEY_SMALL).getString(0);
+                }
+            }
+            if (data.has(KEY_CURRENCY) && !data.isNull(KEY_CURRENCY)) {
+                currency = data.getString(KEY_CURRENCY);
+            }
+            if (data.has(KEY_MSRP) && !data.isNull(KEY_MSRP)) {
+                msrp = data.getString(KEY_MSRP);
+            }
+            if (data.has(KEY_OFFER_PRICE) && !data.isNull(KEY_OFFER_PRICE)) {
                 offer_price = data.getString(KEY_OFFER_PRICE);
             }
             if (data.has(KEY_OFFER_ID) && !data.isNull(KEY_OFFER_ID)) {

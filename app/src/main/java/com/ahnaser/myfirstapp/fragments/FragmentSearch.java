@@ -18,18 +18,14 @@ import com.ahnaser.myfirstapp.MyApplication;
 import com.ahnaser.myfirstapp.R;
 import com.ahnaser.myfirstapp.activities.SubActivity;
 import com.ahnaser.myfirstapp.adapters.AdapterProducts;
-import com.ahnaser.myfirstapp.extras.Constants;
 import com.ahnaser.myfirstapp.extras.Keys;
 import com.ahnaser.myfirstapp.extras.ProductSorter;
 import com.ahnaser.myfirstapp.extras.SortListener;
-import com.ahnaser.myfirstapp.network.VolleySingleton;
-import com.ahnaser.myfirstapp.pojo.Product;
 import com.ahnaser.souqapi.SouqAPIConnection;
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkError;
 import com.android.volley.NoConnectionError;
 import com.android.volley.ParseError;
-import com.android.volley.RequestQueue;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
@@ -58,13 +54,8 @@ public class FragmentSearch extends Fragment implements SortListener {
     private String mParam2;
 
     private String query="iphone";
-    /*private static String API_SOUQ_PRODUCTS_SEARCH1="https://api.souq.com/v1/products?q=";
-     private static String API_SOUQ_PRODUCTS_SEARCH2="&&page=";
-     private static String API_SOUQ_PRODUCTS_SEARCH3="&show=20&show_attributes=0&country=ae&language=en&format=json";*/
      private int current=1,totalPages=1,totalItems=1;
-     private VolleySingleton volleySingleton;
-     private RequestQueue requestQueue;
-    private ArrayList<Product> listProducts=new ArrayList<>();
+    private ArrayList<com.ahnaser.souqapi.pojos.Product> listProducts=new ArrayList<>();
     private RecyclerView productsList;
     private AdapterProducts adapterProducts;
     private TextView textVolleyError;
@@ -74,8 +65,6 @@ public class FragmentSearch extends Fragment implements SortListener {
      private int visibleThreshold = 5;
      private int firstVisibleItem, visibleItemCount, totalItemCount;
      private LinearLayoutManager mLayoutManager;
-     HashMap <String,String> params;
-     JSONObject paraobj;
 
      SouqAPIConnection souqAPIConnection;
 
@@ -109,9 +98,6 @@ public class FragmentSearch extends Fragment implements SortListener {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
-        //volleySingleton=VolleySingleton.getInstance();
-        //requestQueue=volleySingleton.getRequestQueue();
         mLayoutManager=new LinearLayoutManager(getActivity());
 
         souqAPIConnection=new SouqAPIConnection(MyApplication.CLIENT_ID,MyApplication.API_KEY_SOUQ,getActivity());
@@ -121,6 +107,7 @@ public class FragmentSearch extends Fragment implements SortListener {
 
          Map<String,String> params=new HashMap<String,String>();
          params.put("q",query);
+         params.put("show_attributes", "1");
 
          souqAPIConnection.setResponseObserver(new SouqAPIConnection.ResponseObserver() {
              @Override
@@ -154,46 +141,11 @@ public class FragmentSearch extends Fragment implements SortListener {
 
              }
          });
-         souqAPIConnection.get("products",params);
-
-
-      /*  JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, getRequestUrl(),(String) null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                textVolleyError.setVisibility(View.GONE);
-                listProducts=parseJSONRequest(response);
-                adapterProducts.setListProducts(listProducts);
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                textVolleyError.setVisibility(View.VISIBLE);
-                if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                    textVolleyError.setText(R.string.error_timeout);
-
-                } else if (error instanceof AuthFailureError) {
-                    textVolleyError.setText(R.string.error_auth_failure);
-                    //TODO
-                } else if (error instanceof ServerError) {
-                    textVolleyError.setText(R.string.error_auth_failure);
-                    //TODO
-                } else if (error instanceof NetworkError) {
-                    textVolleyError.setText(R.string.error_network);
-                    //TODO
-                } else if (error instanceof ParseError) {
-                    textVolleyError.setText(R.string.error_parser);
-                    //TODO
-                }
-
-            }
-        });
-        requestQueue.add(request);*/
-
+         souqAPIConnection.get("products", params);
     }
 
-     private ArrayList<Product> parseJSONRequest(JSONObject response) {
-         ArrayList<Product> products=new ArrayList<>();
+     private ArrayList<com.ahnaser.souqapi.pojos.Product> parseJSONRequest(JSONObject response) {
+         ArrayList<com.ahnaser.souqapi.pojos.Product> products=new ArrayList<>();
 
          if (response!=null || response.length()>0) {
 
@@ -218,11 +170,8 @@ public class FragmentSearch extends Fragment implements SortListener {
                      } catch (JSONException e) {
                          e.printStackTrace();
                      }
-
                  }
-
              }
-
 
              try {
                  JSONObject dataObject = response.getJSONObject(Keys.EndpointProducts.KEY_DATA);
@@ -230,49 +179,11 @@ public class FragmentSearch extends Fragment implements SortListener {
                      JSONArray arrayProducts = dataObject.getJSONArray(Keys.EndpointProducts.KEY_PRODUCTS);
                      for (int i = 0; i < arrayProducts.length(); i++) {
 
-                         String id="-1";
-                         String label= Constants.NA;
-                         String msrp=Constants.NA;
-                         String offerPrice=Constants.NA;
-                         String link=Constants.NA;
-                         String image=Constants.NA;
-
                          JSONObject currentProduct = arrayProducts.getJSONObject(i);
-                         if(currentProduct.has(Keys.EndpointProducts.KEY_ID) && !currentProduct.isNull(Keys.EndpointProducts.KEY_ID)) {
-                             id = currentProduct.getString(Keys.EndpointProducts.KEY_ID);
-                         }
-
-                         if(currentProduct.has(Keys.EndpointProducts.KEY_LABEL) && !currentProduct.isNull(Keys.EndpointProducts.KEY_LABEL)) {
-                             label = currentProduct.getString(Keys.EndpointProducts.KEY_LABEL);
-                         }
-
-                         if(currentProduct.has(Keys.EndpointProducts.KEY_MARKET_PRICE) && !currentProduct.isNull(Keys.EndpointProducts.KEY_MARKET_PRICE)) {
-                             msrp = "Price: "+ currentProduct.getString(Keys.EndpointProducts.KEY_MARKET_PRICE) + " AED";
-                         }
-
-                         if (currentProduct.has(Keys.EndpointProducts.KEY_OFFER_PRICE) && !currentProduct.isNull(Keys.EndpointProducts.KEY_OFFER_PRICE))
-                             offerPrice = "Price: "+currentProduct.getString(Keys.EndpointProducts.KEY_OFFER_PRICE) + " AED";
-                         else
-                             offerPrice=msrp;
-
-                         if(currentProduct.has(Keys.EndpointProducts.KEY_IMAGES) && !currentProduct.isNull(Keys.EndpointProducts.KEY_IMAGES)) {
-                             JSONObject images = currentProduct.getJSONObject(Keys.EndpointProducts.KEY_IMAGES);
-
-                             if (images.has(Keys.EndpointProducts.KEY_SMALL) && !images.isNull(Keys.EndpointProducts.KEY_SMALL)) {
-                                 image = images.getJSONArray(Keys.EndpointProducts.KEY_SMALL).getString(0);
-                             }
-                         }
-
-                         if(currentProduct.has(Keys.EndpointProducts.KEY_LINK) && !currentProduct.isNull(Keys.EndpointProducts.KEY_LINK)) {
-                             link = currentProduct.getString(Keys.EndpointProducts.KEY_LINK);
-                         }
-
-
-                         if(!id.equals("-1") && !label.equals(Constants.NA) ) {
-                             Product product = new Product(id, label, msrp, offerPrice, link, image);
+                         com.ahnaser.souqapi.pojos.Product product=new com.ahnaser.souqapi.pojos.Product(currentProduct);
+                         if(!product.getId().equals("-1") && !product.getLabel().equals("NA")) {
                              products.add(product);
                          }
-
                      }
 
                  } catch (JSONException e) {
@@ -329,8 +240,9 @@ public class FragmentSearch extends Fragment implements SortListener {
                 if (!loading && (totalItemCount - visibleItemCount)
                         <= (firstVisibleItem + visibleThreshold)) {
                     current++;
-                    if(current<=totalPages)
+                    if (current <= totalPages) {
                         onCurrentSearch();
+                    } else
                     loading = true;
                 }
             }
@@ -339,10 +251,6 @@ public class FragmentSearch extends Fragment implements SortListener {
         sendNewJsonRequest();
         return view;
     }
-
-    /*public  String getRequestUrl(){
-        return API_SOUQ_PRODUCTS_SEARCH1+query+API_SOUQ_PRODUCTS_SEARCH2+Integer.toString(current)+API_SOUQ_PRODUCTS_SEARCH3+MyApplication.CLIENT_ID+ MyApplication.API_KEY_SOUQ;
-    }*/
 
      @Override
      public void onSortByName() {
@@ -367,13 +275,16 @@ public class FragmentSearch extends Fragment implements SortListener {
          totalItems=1;
          adapterProducts=new AdapterProducts(getActivity());
          productsList.setAdapter(adapterProducts);
+         loading=true;
+         previousTotal=0;
          sendNewJsonRequest();
      }
 
      public void onCurrentSearch(){
 
          Map<String,String> params=new HashMap<String,String>();
-         params.put("q","iphone");
+         params.put("q",query);
+         params.put("page",Integer.toString(current));
 
          souqAPIConnection.setResponseObserver(new SouqAPIConnection.ResponseObserver() {
              @Override
@@ -405,40 +316,6 @@ public class FragmentSearch extends Fragment implements SortListener {
              }
          });
          souqAPIConnection.get("products",params);
-
-         /*JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, getRequestUrl(),(String) null, new Response.Listener<JSONObject>() {
-             @Override
-             public void onResponse(JSONObject response) {
-                 textVolleyError.setVisibility(View.GONE);
-                 listProducts.addAll(parseJSONRequest(response));
-                 //adapterProducts.setListProducts(listProducts);
-                 adapterProducts.notifyDataSetChanged();
-             }
-         }, new Response.ErrorListener() {
-             @Override
-             public void onErrorResponse(VolleyError error) {
-                 textVolleyError.setVisibility(View.VISIBLE);
-                 if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                     textVolleyError.setText(R.string.error_timeout);
-
-                 } else if (error instanceof AuthFailureError) {
-                     textVolleyError.setText(R.string.error_auth_failure);
-                     //TODO
-                 } else if (error instanceof ServerError) {
-                     textVolleyError.setText(R.string.error_auth_failure);
-                     //TODO
-                 } else if (error instanceof NetworkError) {
-                     textVolleyError.setText(R.string.error_network);
-                     //TODO
-                 } else if (error instanceof ParseError) {
-                     textVolleyError.setText(R.string.error_parser);
-                     //TODO
-                 }
-
-             }
-         });
-         requestQueue.add(request);*/
-
      }
 
      class RecyclerTouchListener implements RecyclerView.OnItemTouchListener{
