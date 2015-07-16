@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -18,34 +17,21 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ImageSpan;
 import android.util.SparseArray;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ahnaser.myfirstapp.R;
-import com.ahnaser.myfirstapp.extras.L;
 import com.ahnaser.myfirstapp.extras.SortListener;
 import com.ahnaser.myfirstapp.fragments.FragmentSearch;
 import com.ahnaser.myfirstapp.fragments.NavigationDrawerFragment;
 import com.ahnaser.myfirstapp.tabs.SlidingTabLayout;
-import com.ahnaser.souqapi.AccessToken;
-import com.ahnaser.souqapi.SouqAPIConnection;
-import com.android.volley.VolleyError;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class MyActivity extends ActionBarActivity implements View.OnClickListener {
@@ -107,39 +93,7 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
                 .attachTo(actionButton)
                 .build();
         handleIntent(getIntent());
-
-        //test();
     }
-
-    private void test(){
-        SouqAPIConnection connection=new SouqAPIConnection("38607576","EB008DQ5bnzmSZty8fyp",this);
-        AccessToken accessToken=new AccessToken("aSW5tbq5ssE1LJmtfTsqpIydmD8pK6wpnwXDsWhu","9190178");
-        connection.setAccessToken(accessToken);
-        Map<String,String> params=new HashMap<String,String>();
-        params.put("cart_id","36141702");
-        params.put("offer_id", "37725300033");
-        connection.setResponseObserver(new SouqAPIConnection.ResponseObserver() {
-            @Override
-            public void onError(VolleyError error) {
-
-                L.T(getApplicationContext(), Integer.toString(error.networkResponse.statusCode));
-            }
-
-            @Override
-            public void onSuccess(JSONObject response, int statusCode) {
-                JSONObject data=new JSONObject();
-                try {
-                    JSONArray arr=response.getJSONArray("data");
-                    data.put("data",arr);
-                    L.T(getApplicationContext(), data.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        connection.delete("carts/36141702/offers/37725300033", params);
-    }
-
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -266,29 +220,6 @@ public class MyActivity extends ActionBarActivity implements View.OnClickListene
 
         public Fragment getRegisteredFragment(int position) {
             return registeredFragments.get(position);
-        }
-    }
-
-    public static class MyFragment extends Fragment{
-        private TextView textView;
-        public static MyFragment getInstance(int position){
-            MyFragment myFragment=new MyFragment();
-            Bundle args=new Bundle();
-            args.putInt("position",position);
-            myFragment.setArguments(args);
-            return myFragment;
-        }
-
-        @Nullable
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View layout=inflater.inflate(R.layout.fragment_my,container,false);
-            textView=(TextView) layout.findViewById(R.id.position);
-            Bundle bundle=getArguments();
-            if(bundle!=null){
-                textView.setText("Page No. "+bundle.getInt("position"));
-            }
-            return layout;
         }
     }
 }

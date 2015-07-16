@@ -103,10 +103,11 @@ public class FragmentSearch extends Fragment implements SortListener {
         souqAPIConnection=new SouqAPIConnection(MyApplication.CLIENT_ID,MyApplication.API_KEY_SOUQ,getActivity());
     }
 
-     private void sendNewJsonRequest(){
+     private void search(){
 
          Map<String,String> params=new HashMap<String,String>();
          params.put("q",query);
+         params.put("page",Integer.toString(current));
          params.put("show_attributes", "1");
 
          souqAPIConnection.setResponseObserver(new SouqAPIConnection.ResponseObserver() {
@@ -135,9 +136,10 @@ public class FragmentSearch extends Fragment implements SortListener {
 
              @Override
              public void onSuccess(JSONObject response, int statusCode) {
+
                  textVolleyError.setVisibility(View.GONE);
-                 listProducts = parseJSONRequest(response);
-                 adapterProducts.setListProducts(listProducts);
+                 listProducts.addAll(parseJSONRequest(response));
+                 adapterProducts.notifyDataSetChanged();
 
              }
          });
@@ -241,14 +243,15 @@ public class FragmentSearch extends Fragment implements SortListener {
                         <= (firstVisibleItem + visibleThreshold)) {
                     current++;
                     if (current <= totalPages) {
-                        onCurrentSearch();
+                        search();
                     } else
-                    loading = true;
+                        loading = true;
                 }
             }
         });
 
-        sendNewJsonRequest();
+        adapterProducts.setListProducts(listProducts);
+        search();
         return view;
     }
 
@@ -273,49 +276,15 @@ public class FragmentSearch extends Fragment implements SortListener {
          current=1;
          totalPages=1;
          totalItems=1;
-         adapterProducts=new AdapterProducts(getActivity());
-         productsList.setAdapter(adapterProducts);
          loading=true;
          previousTotal=0;
-         sendNewJsonRequest();
-     }
 
-     public void onCurrentSearch(){
+         adapterProducts=new AdapterProducts(getActivity());
+         listProducts=new ArrayList<>();
+         adapterProducts.setListProducts(listProducts);
+         productsList.setAdapter(adapterProducts);
 
-         Map<String,String> params=new HashMap<String,String>();
-         params.put("q",query);
-         params.put("page",Integer.toString(current));
-
-         souqAPIConnection.setResponseObserver(new SouqAPIConnection.ResponseObserver() {
-             @Override
-             public void onError(VolleyError error) {
-                 textVolleyError.setVisibility(View.VISIBLE);
-                 if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                     textVolleyError.setText(R.string.error_timeout);
-
-                 } else if (error instanceof AuthFailureError) {
-                     textVolleyError.setText(R.string.error_auth_failure);
-                     //TODO
-                 } else if (error instanceof ServerError) {
-                     textVolleyError.setText(R.string.error_auth_failure);
-                     //TODO
-                 } else if (error instanceof NetworkError) {
-                     textVolleyError.setText(R.string.error_network);
-                     //TODO
-                 } else if (error instanceof ParseError) {
-                     textVolleyError.setText(R.string.error_parser);
-                     //TODO
-                 }
-             }
-
-             @Override
-             public void onSuccess(JSONObject response, int statusCode) {
-                 textVolleyError.setVisibility(View.GONE);
-                 listProducts.addAll(parseJSONRequest(response));
-                 adapterProducts.notifyDataSetChanged();
-             }
-         });
-         souqAPIConnection.get("products",params);
+         search();
      }
 
      class RecyclerTouchListener implements RecyclerView.OnItemTouchListener{
@@ -361,10 +330,6 @@ public class FragmentSearch extends Fragment implements SortListener {
      public static interface ClickListener{
          public void onClick(View view, int position);
          public void onLongClick(View view,int position);
-
-     }
-
-     class onScroll extends RecyclerView.OnScrollListener {
 
      }
  }

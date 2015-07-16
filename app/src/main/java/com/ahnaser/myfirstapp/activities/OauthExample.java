@@ -13,50 +13,22 @@ import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.ahnaser.myfirstapp.MyApplication;
 import com.ahnaser.myfirstapp.R;
 import com.ahnaser.myfirstapp.extras.L;
-import com.ahnaser.souqapi.AccessToken;
 import com.ahnaser.souqapi.SouqAPIConnection;
-import com.ahnaser.souqapi.SouqAPIResult;
-import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 public class OauthExample extends ActionBarActivity {
 
     private WebView webView;
     private ProgressDialog pd;
     private SouqAPIConnection connection;
-    private StringRequest stringRequest;
-
-    private AccessToken accessToken;
-    private RequestQueue requestQueue;
-    private SouqAPIResult apiResult;
-    private int status;
     private String authorizationToken;
 
-    private static final String KEY_ACCESS_TOKEN = "access_token";
-    private static final String KEY_APP_ID = "app_id";
-    private static final String KEY_APP_SECRET = "app_secret";
-    private static final String KEY_CLIENT_ID="client_id";
-    private static final String KEY_CLIENT_SECRET="client_secret";
-    private static final String KEY_LANGUAGE = "language";
-    private static final String KEY_COUNTRY = "country";
-    private static final String KEY_CUSTOMER_ID = "customer_id";
-
-    private String apiBaseUrl="https://api.souq.com";
-    private String apiUrl="https://api.souq.com/v1/";
-    private String authorizeUrl="/oauth/authorize";
-    private String accessTokenUrl="/oauth/access_token";
-    private String defaultCountry="ae";
-    private String defaultLanguage="ar";
+    private String redirectUri="https://api.souq.com/oauth/authorize/";
     private String scopes="customer_profile,cart_management,customer_demographics,customer_profile,cart_management,customer_demographics";
 
     SharedPreferences sharedPreferences;
@@ -71,18 +43,17 @@ public class OauthExample extends ActionBarActivity {
         sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor=sharedPreferences.edit();
 
-        requestQueue= Volley.newRequestQueue(this);
-        test();
+        OAuth();
 
 
     }
 
-    void test(){
-        connection=new SouqAPIConnection("38607576","EB008DQ5bnzmSZty8fyp",this);
+    void OAuth(){
+        connection=new SouqAPIConnection(MyApplication.CLIENT_ID,MyApplication.API_KEY_SOUQ,this);
 
         webView=(WebView) findViewById(R.id.webView);
         webView.requestFocus(View.FOCUS_DOWN);
-        pd = ProgressDialog.show(this, "", "Loading..",true);
+        pd = ProgressDialog.show(this, "", "Loading...",true);
 
         webView.setWebViewClient(new WebViewClient() {
 
@@ -125,7 +96,7 @@ public class OauthExample extends ActionBarActivity {
                         }
                     });
 
-                    connection.setAccessTokenFromServer(authorizationToken, "https://api.souq.com/oauth/authorize/", scopes);
+                    connection.setAccessTokenFromServer(authorizationToken, redirectUri, scopes);
 
                 } else {
                     Log.i("Authorize", "Redirecting to: " + url);
@@ -161,32 +132,5 @@ public class OauthExample extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private String generateUrl(String uri,Map<String,String> paramss){
-        Map<String,String> params=new HashMap<String, String>();
-        StringBuilder url = new StringBuilder();
-
-            if (paramss != null) {
-                if (!paramss.isEmpty()) {
-                    params.putAll(paramss);
-                }
-            }
-
-            Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
-            if (iterator.hasNext()) {
-                url.append('?');
-            }
-            while (iterator.hasNext()) {
-                Map.Entry<String, String> param = iterator.next();
-                url.append(param.getKey()).append('=')
-                        .append(param.getValue());
-                if (iterator.hasNext()) {
-                    url.append('&');
-                }
-            }
-
-            Log.v("ACCESS TOKEN: ", apiBaseUrl + uri + url.toString());
-            return apiBaseUrl + uri + url.toString();
     }
 }

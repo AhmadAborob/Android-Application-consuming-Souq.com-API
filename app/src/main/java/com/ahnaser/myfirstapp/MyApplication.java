@@ -7,8 +7,8 @@ import android.content.Context;
  * Created by root on 23/05/15.
  */
 public class MyApplication extends Application {
-    public static final String API_KEY_SOUQ="&app_secret=EB008DQ5bnzmSZty8fyp";
-    public static final String CLIENT_ID="&app_id=38607576";
+    public static final String API_KEY_SOUQ="EB008DQ5bnzmSZty8fyp";
+    public static final String CLIENT_ID="38607576";
     private static MyApplication sInstance;
 
     @Override

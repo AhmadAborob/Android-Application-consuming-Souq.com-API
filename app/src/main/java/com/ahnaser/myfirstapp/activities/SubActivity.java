@@ -70,11 +70,11 @@ public class SubActivity extends ActionBarActivity {
 
         souqAPIConnection=new SouqAPIConnection(MyApplication.CLIENT_ID,MyApplication.API_KEY_SOUQ,this);
 
-        sendJSONRequest();
+        setProduct();
 
     }
 
-    private void sendJSONRequest(){
+    private void setProduct(){
 
         Map<String,String> params=new HashMap<>();
         params.put("show_attributes","1");
